@@ -2032,6 +2032,10 @@ function checkUserRole() {
     'xiomaralamasmala@gmail.com'
   ].includes(currentUser.email);
 
+  // LOG DE PRUEBA: Abre la consola con F12 para ver esto
+  console.log("Usuario actual:", currentUser ? currentUser.email : "Nadie");
+  console.log("¿Es Admin?:", esAdmin);
+
   if (esAdmin) {
     userRole = 'admin';
 
