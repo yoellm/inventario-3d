@@ -469,22 +469,23 @@
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, update, remove, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { getDatabase, ref, onValue, update, remove, push, set } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-storage.js";
 
-// Tu configuración actualizada
-const firebaseConfig = {
-  apiKey: "AIzaSyAB57gP3-puL3O6kIAaxihjnuEQBnOw_DM",
-  authDomain: "savvy-nature-200119.firebaseapp.com",
-  databaseURL: "https://savvy-nature-200119-default-rtdb.firebaseio.com", // URL genérica para tu proyecto
-  projectId: "savvy-nature-200119",
-  storageBucket: "savvy-nature-200119.firebasestorage.app",
-  messagingSenderId: "46842974811",
-  appId: "1:46842974811:web:097f5ffcdbc01b49e7a57e"
-};
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAB57gP3-puL3O6kIAaxihjnuEQBnOw_DM",
+    authDomain: "savvy-nature-200119.firebaseapp.com",
+    projectId: "savvy-nature-200119",
+    storageBucket: "savvy-nature-200119.firebasestorage.app",
+    messagingSenderId: "46842974811",
+    appId: "1:46842974811:web:097f5ffcdbc01b49e7a57e"
+  };
+
+  // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
@@ -1946,50 +1947,51 @@ window.onscroll = () => {
 };
 
 document.getElementById('scrollTopBtn').onclick = () => window.scrollTo({ top:0, behavior:'smooth' });
-
-onAuthStateChanged(auth, async (user) => {
-  const loginDiv = document.getElementById('loginDiv');
-  const mainApp = document.getElementById('mainApp');
- console.log("¡EJECUTANDO checkUserRole!");
-  if (user) {
-    console.log("Es usuario");
-    currentUser = user;
-    document.body.classList.add('app-logeada');
-
-    loginDiv.classList.add('hidden');
-    loginDiv.style.display = 'none';
-
-    mainApp.classList.remove('hidden');
-    mainApp.style.display = 'block';
-
-    avisarAppUsuario(user.email || '');
-
-    if (!loginLogHecho) {
-      loginLogHecho = true;
-      try {
-        await guardarLog('usuario-conectado', null, 'LOGIN', 0, user.email, 'Inicio de sesión correcto');
-      } catch (e) {
-        console.error('Error guardando log de conexión', e);
+  
+onAuthStateChanged(auth, (user) => {
+   const loginDiv = document.getElementById('loginDiv');
+   const mainApp = document.getElementById('mainApp');
+  
+   console.log("¡EJECUTANDO checkUserRole!");
+    if (user) {
+      console.log("Es usuario");
+      currentUser = user;
+      document.body.classList.add('app-logeada');
+  
+      loginDiv.classList.add('hidden');
+      loginDiv.style.display = 'none';
+  
+      mainApp.classList.remove('hidden');
+      mainApp.style.display = 'block';
+  
+      avisarAppUsuario(user.email || '');
+  
+      if (!loginLogHecho) {
+        loginLogHecho = true;
+        try {
+          await guardarLog('usuario-conectado', null, 'LOGIN', 0, user.email, 'Inicio de sesión correcto');
+        } catch (e) {
+          console.error('Error guardando log de conexión', e);
+        }
       }
+  
+      checkUserRole();
+    } else {
+      currentUser = null;
+      loginLogHecho = false;
+      document.body.classList.remove('app-logeada');
+  
+      mainApp.classList.add('hidden');
+      mainApp.style.display = 'none';
+  
+      loginDiv.classList.remove('hidden');
+      loginDiv.style.display = 'block';
+  
+      avisarAppUsuario('');
+      refrescarEstadoBloqueoPreciosLaura();
+  
+      dataListenerIniciado = false;
     }
-
-    checkUserRole();
-  } else {
-    currentUser = null;
-    loginLogHecho = false;
-    document.body.classList.remove('app-logeada');
-
-    mainApp.classList.add('hidden');
-    mainApp.style.display = 'none';
-
-    loginDiv.classList.remove('hidden');
-    loginDiv.style.display = 'block';
-
-    avisarAppUsuario('');
-    refrescarEstadoBloqueoPreciosLaura();
-
-    dataListenerIniciado = false;
-  }
 });
 
 window.login = () => {
