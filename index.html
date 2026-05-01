@@ -1969,7 +1969,7 @@ onAuthStateChanged(auth, (user) => {
       if (!loginLogHecho) {
         loginLogHecho = true;
         try {
-          await guardarLog('usuario-conectado', null, 'LOGIN', 0, user.email, 'Inicio de sesión correcto');
+          //await guardarLog('usuario-conectado', null, 'LOGIN', 0, user.email, 'Inicio de sesión correcto');
         } catch (e) {
           console.error('Error guardando log de conexión', e);
         }
