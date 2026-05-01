@@ -1950,8 +1950,9 @@ document.getElementById('scrollTopBtn').onclick = () => window.scrollTo({ top:0,
 onAuthStateChanged(auth, async (user) => {
   const loginDiv = document.getElementById('loginDiv');
   const mainApp = document.getElementById('mainApp');
-
+ console.log("¡EJECUTANDO checkUserRole!");
   if (user) {
+    console.log("Es usuario");
     currentUser = user;
     document.body.classList.add('app-logeada');
 
