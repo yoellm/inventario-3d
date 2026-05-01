@@ -3,68 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Inventario Pro - Mural Azul</title>
+    <title>Inventario Pro - Acceso Privado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .hidden { display: none !important; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="bg-slate-100 min-h-screen">
 
-    <nav class="gradient-bg text-white p-4 shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-tight">Mural Azul <span class="text-sm font-light opacity-80">| Gestión</span></h1>
-            <button onclick="toggleAdmin()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition">
-                <i class="fa-solid fa-lock"></i> Modo Admin
-            </button>
-        </div>
-    </nav>
-
-    <div class="container mx-auto mt-6 grid grid-cols-1 md:grid-cols-4 gap-4 px-4">
-        <div class="glass p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
-            <p class="text-gray-500 text-xs uppercase font-bold">Total Stock</p>
-            <p id="stat-stock" class="text-2xl font-black">0</p>
-        </div>
-        <div class="glass p-4 rounded-xl shadow-sm border-l-4 border-green-500">
-            <p class="text-gray-500 text-xs uppercase font-bold">Valor Inventario</p>
-            <p id="stat-valor" class="text-2xl font-black">€0.00</p>
-        </div>
-    </div>
-
-    <div id="admin-panel" class="hidden container mx-auto mt-8 px-4">
-        <div class="bg-white p-6 rounded-2xl shadow-xl border border-blue-100">
-            <h2 class="text-xl font-bold mb-4 text-blue-800"><i class="fa-solid fa-plus-circle"></i> Añadir Nuevo Producto (Fabricante)</h2>
-            <form id="adminForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input type="text" id="p-nombre" placeholder="Nombre del producto" class="p-3 border rounded-xl focus:ring-2 focus:ring-blue-400 outline-none" required>
-                <input type="number" id="p-stock" placeholder="Stock inicial" class="p-3 border rounded-xl" required>
-                <input type="number" id="p-coste" step="0.01" placeholder="Precio Coste (€)" class="p-3 border rounded-xl" required>
-                <button type="submit" class="bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">Guardar Producto</button>
+    <!-- PANTALLA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 flex items-center justify-center bg-slate-900 z-[100]">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-slate-800">Mural Azul</h2>
+                <p class="text-slate-500">Inicia sesión para continuar</p>
+            </div>
+            <form id="loginForm" class="space-y-4">
+                <input type="email" id="login-email" placeholder="Correo electrónico" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
+                <input type="password" id="login-pass" placeholder="Contraseña" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" required>
+                <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 transition">Entrar</button>
             </form>
+            <p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden">Datos incorrectos</p>
         </div>
     </div>
 
-    <div class="container mx-auto mt-8 px-4 pb-20">
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-            <table class="w-full text-left">
-                <thead class="bg-gray-50 border-b">
-                    <tr>
-                        <th class="p-4 font-semibold text-gray-600">Producto</th>
-                        <th class="p-4 font-semibold text-gray-600">Stock Disp.</th>
-                        <th class="p-4 font-semibold text-gray-600">Tu Precio Venta (€)</th>
-                        <th class="p-4 font-semibold text-gray-600">Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-body">
-                    </tbody>
-            </table>
+    <!-- CONTENIDO PRINCIPAL (Oculto hasta login) -->
+    <div id="main-content" class="hidden">
+        <nav class="bg-slate-800 text-white p-4 shadow-md sticky top-0 z-50">
+            <div class="container mx-auto flex justify-between items-center">
+                <h1 class="text-xl font-bold">Panel Inventario</h1>
+                <div class="flex items-center gap-4">
+                    <span id="user-display" class="text-sm opacity-80"></span>
+                    <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/40 px-3 py-1 rounded text-sm transition">Salir</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Stats Bar -->
+        <div class="container mx-auto mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 px-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border-b-4 border-blue-500">
+                <p class="text-gray-400 text-xs font-bold">STOCK TOTAL</p>
+                <p id="stat-stock" class="text-2xl font-black">0</p>
+            </div>
+            <div id="stat-coste-container" class="bg-white p-4 rounded-xl shadow-sm border-b-4 border-emerald-500 hidden">
+                <p class="text-gray-400 text-xs font-bold">VALOR COSTE</p>
+                <p id="stat-valor" class="text-2xl font-black">€0.00</p>
+            </div>
+        </div>
+
+        <!-- Panel Fabricante (Añadir productos) -->
+        <div id="fabricante-panel" class="container mx-auto mt-8 px-4 hidden">
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-blue-100">
+                <h2 class="text-lg font-bold mb-4 text-slate-700"><i class="fa-solid fa-box-open mr-2"></i>Añadir Mercancía</h2>
+                <form id="adminForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input type="text" id="p-nombre" placeholder="Nombre" class="p-2 border rounded-lg" required>
+                    <input type="number" id="p-stock" placeholder="Stock" class="p-2 border rounded-lg" required>
+                    <input type="number" id="p-coste" step="0.01" placeholder="Coste €" class="p-2 border rounded-lg" required>
+                    <button type="submit" class="bg-blue-600 text-white rounded-lg font-bold">Guardar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="container mx-auto mt-8 px-4 pb-20">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b">
+                        <tr>
+                            <th class="p-4 text-slate-600">Producto</th>
+                            <th class="p-4 text-slate-600">Stock</th>
+                            <th class="p-4 text-slate-600">P. Venta sugerido</th>
+                            <th class="p-4 text-slate-600">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "TU_API_KEY",
@@ -76,74 +99,89 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
         const colRef = collection(db, "productos");
 
-        // UI Elements
-        const adminPanel = document.getElementById('admin-panel');
-        const adminForm = document.getElementById('adminForm');
-        const tabla = document.getElementById('tabla-body');
+        // DEFINIR TU CORREO AQUÍ PARA PERMISOS DE ADMIN
+        const ADMIN_EMAIL = "tu-correo@gmail.com"; 
 
-        // Toggle Admin
-        window.toggleAdmin = () => {
-            adminPanel.classList.toggle('hidden');
-        };
-
-        // Escuchar datos (Tiempo Real)
-        onSnapshot(colRef, (snapshot) => {
-            let html = '';
-            let totalStock = 0;
-            let totalValor = 0;
-
-            snapshot.forEach(doc => {
-                const p = doc.data();
-                const id = doc.id;
-                totalStock += parseInt(p.stock);
-                totalValor += (p.stock * p.coste);
-
-                html += `
-                    <tr class="border-b hover:bg-blue-50/50 transition">
-                        <td class="p-4 font-medium">${p.nombre}</td>
-                        <td class="p-4"><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">${p.stock} uds</span></td>
-                        <td class="p-4">
-                            <input type="number" placeholder="0.00" class="border rounded-lg p-1 w-24 focus:border-blue-400 outline-none">
-                        </td>
-                        <td class="p-4">
-                            <button onclick="realizarPedido('${id}', '${p.nombre}')" class="bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600">
-                                <i class="fa-solid fa-cart-plus"></i> Pedir
-                            </button>
-                            <button onclick="eliminarProducto('${id}')" class="text-red-400 hover:text-red-600 ml-2 admin-only ${adminPanel.classList.contains('hidden') ? 'hidden' : ''}">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
+        // LOGIN
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            signInWithEmailAndPassword(auth, email, pass).catch(err => {
+                document.getElementById('login-error').classList.remove('hidden');
             });
-            tabla.innerHTML = html;
-            document.getElementById('stat-stock').innerText = totalStock;
-            document.getElementById('stat-valor').innerText = `€${totalValor.toFixed(2)}`;
         });
 
-        // Fabricante: Añadir Producto
-        adminForm.addEventListener('submit', async (e) => {
+        // CONTROL DE SESIÓN
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                document.getElementById('user-display').innerText = user.email;
+
+                // Si es ADMIN, mostrar panel de fabricante y columna de coste
+                if(user.email === ADMIN_EMAIL) {
+                    document.getElementById('fabricante-panel').classList.remove('hidden');
+                    document.getElementById('stat-coste-container').classList.remove('hidden');
+                }
+                cargarDatos(user.email === ADMIN_EMAIL);
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-content').classList.add('hidden');
+            }
+        });
+
+        window.logout = () => signOut(auth);
+
+        // CARGAR DATOS
+        function cargarDatos(isAdmin) {
+            onSnapshot(colRef, (snapshot) => {
+                let html = '';
+                let totalStock = 0;
+                let totalC = 0;
+
+                snapshot.forEach(docSnap => {
+                    const p = docSnap.data();
+                    const id = docSnap.id;
+                    totalStock += Number(p.stock);
+                    totalC += (Number(p.stock) * Number(p.coste));
+
+                    html += `
+                        <tr class="border-b hover:bg-slate-50 transition">
+                            <td class="p-4 font-bold text-slate-700">${p.nombre}</td>
+                            <td class="p-4"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-bold">${p.stock} UDS</span></td>
+                            <td class="p-4">
+                                <input type="number" placeholder="€" class="border p-1 w-20 rounded">
+                            </td>
+                            <td class="p-4">
+                                <button class="bg-emerald-500 text-white px-3 py-1 rounded text-sm">Pedir</button>
+                                ${isAdmin ? `<button onclick="borrar('${id}')" class="ml-2 text-red-500"><i class="fa-solid fa-trash"></i></button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('tabla-body').innerHTML = html;
+                document.getElementById('stat-stock').innerText = totalStock;
+                document.getElementById('stat-valor').innerText = `€${totalC.toFixed(2)}`;
+            });
+        }
+
+        // ACCIONES FABRICANTE
+        document.getElementById('adminForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             await addDoc(colRef, {
                 nombre: document.getElementById('p-nombre').value,
                 stock: document.getElementById('p-stock').value,
-                coste: document.getElementById('p-coste').value,
-                fecha: new Date()
+                coste: document.getElementById('p-coste').value
             });
-            adminForm.reset();
+            e.target.reset();
         });
 
-        // Cliente: Simular Pedido (Bajar Stock)
-        window.realizarPedido = async (id, nombre) => {
-            alert(`Pedido solicitado para: ${nombre}. Aquí podrías conectar un envío de WhatsApp o email.`);
-        };
-
-        window.eliminarProducto = async (id) => {
-            if(confirm('¿Eliminar producto?')) await deleteDoc(doc(db, "productos", id));
-        };
+        window.borrar = async (id) => { if(confirm('¿Eliminar?')) await deleteDoc(doc(db, "productos", id)); };
     </script>
 </body>
 </html>
