@@ -1964,7 +1964,7 @@ onAuthStateChanged(auth, (user) => {
       mainApp.classList.remove('hidden');
       mainApp.style.display = 'block';
   
-      avisarAppUsuario(user.email || '');
+      //avisarAppUsuario(user.email || '');
   
       if (!loginLogHecho) {
         loginLogHecho = true;
@@ -1974,7 +1974,7 @@ onAuthStateChanged(auth, (user) => {
           console.error('Error guardando log de conexión', e);
         }
       }
-  
+      console.log("Comprobamos el ROL....");
       checkUserRole();
     } else {
       currentUser = null;
