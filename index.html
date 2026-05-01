@@ -1832,7 +1832,7 @@ window.eliminarUnaVenta = async (id) => {
 };
 
 window.hacerBackup = async () => {
-  if (currentUser.email !== 'nilose2014@gmail.com') return alert('✖ Solo nilose2014@gmail.com puede hacer backup');
+  if (currentUser.email !== 'yoelmejias@outlook.es') return alert('✖ Solo yoelmejias@outlook.es puede hacer backup');
   try {
     const backupData = {
       productos,
@@ -1868,7 +1868,7 @@ window.hacerBackup = async () => {
 };
 
 window.restaurarBackup = async (event) => {
-  if (currentUser.email !== 'nilose2014@gmail.com') return showToast('✖ Solo nilose2014@gmail.com puede restaurar', 'error');
+  if (currentUser.email !== 'yoelmejias@outlook.es') return showToast('✖ Solo yoelmejias@outlook.es puede restaurar', 'error');
   const file = event.target.files[0];
   if (!file) return;
 
@@ -1901,7 +1901,7 @@ window.restaurarBackup = async (event) => {
 };
 
 window.cargarBackupFirebase = () => {
-  if (currentUser.email !== 'nilose2014@gmail.com') return;
+  if (currentUser.email !== 'yoelmejias@outlook.es') return;
   onValue(backupRef, (snap) => {
     if (snap.exists()) {
       ultimoBackup = snap.val();
@@ -2088,7 +2088,7 @@ function updateUI() {
 
   if (userRole === 'admin') {
     if (thAcciones) thAcciones.style.display = '';
-    status.innerHTML = `👑 <strong>ADMIN (nilose2014@gmail.com):</strong> ${currentUser.email}<br>Todos los permisos + BACKUP + PRÓXIMO STOCK + ESTADÍSTICAS + LOGS + FOTOS`;
+    status.innerHTML = `👑 <strong>ADMIN (yoelmejias@outlook.es):</strong> ${currentUser.email}<br>Todos los permisos + BACKUP + PRÓXIMO STOCK + ESTADÍSTICAS + LOGS + FOTOS`;
     status.className = 'admin';
     guardarBtn.disabled = false;
     guardarBtn.className = '';
