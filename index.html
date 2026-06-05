@@ -2742,6 +2742,7 @@ window.guardar = async () => {
       showToast('⌛ Comprimiendo y subiendo foto...', 'info', 3000);
       imagenActual = await subirImagenProducto(file, nombre);
     }
+    console.log('Guardando...')
 
     const data = {
       nombre,
