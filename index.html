@@ -58,9 +58,9 @@
   <div id="mainApp" style="display:none" class="main-app">
 
     <div class="totales-superiores" id="totalesSuperiores">
-      <div class="total-box-superior bea">
-        <strong>💵 Venta Bea</strong>
-        <span id="tBeaSup">€0.00</span>
+      <div class="total-box-superior yoel">
+        <strong>💵 Venta yoel</strong>
+        <span id="tyoelSup">€0.00</span>
       </div>
       <div class="total-box-superior laura">
         <strong>💵 Venta Laura</strong>
@@ -107,8 +107,8 @@
         </div>
 
         <div class="form-campo">
-          <label for="bea">Precio Bea</label>
-          <input id="bea" type="number" step="0.01" placeholder="0.00">
+          <label for="yoel">Precio yoel</label>
+          <input id="yoel" type="number" step="0.01" placeholder="0.00">
         </div>
 
         <div class="form-campo">
@@ -177,8 +177,8 @@
             <option value="vendidos-asc">Vendidos ↑</option>
             <option value="reservados-desc">Reservados ↓</option>
             <option value="reservados-asc">Reservados ↑</option>
-            <option value="bea-asc">Bea ↑</option>
-            <option value="bea-desc">Bea ↓</option>
+            <option value="yoel-asc">yoel ↑</option>
+            <option value="yoel-desc">yoel ↓</option>
             <option value="laura-asc">Laura ↑</option>
             <option value="laura-desc">Laura ↓</option>
           </select>
@@ -195,7 +195,7 @@
               <th>Próx.</th>
               <th>Reservados</th>
               <th>Vendidos</th>
-              <th>Bea €</th>
+              <th>yoel €</th>
               <th>Laura €</th>
               <th>Reservar</th>
               <th>Vender</th>
@@ -233,7 +233,7 @@
               <th>Próx.</th>
               <th>Reservados</th>
               <th>Vendidos</th>
-              <th>Bea €</th>
+              <th>yoel €</th>
               <th>Laura €</th>
               <th>Acción</th>
             </tr>
@@ -245,8 +245,8 @@
 
     <div class="totales-container summary-bottom">
       <div class="total-box">
-        <strong>💵 Venta Bea</strong>
-        <span id="tBea">€0.00</span>
+        <strong>💵 Venta yoel</strong>
+        <span id="tyoel">€0.00</span>
       </div>
       <div class="total-box">
         <strong>💵 Venta Laura</strong>
@@ -316,7 +316,7 @@
   <div class="modal-box modal-precios-obligatorio-box">
     <div class="modal-title">⚠️ Productos sin precio Laura</div>
     <div class="modal-message modal-precios-obligatorio-msg">
-      Hay productos con precio Bea pero sin precio Laura. Debes completar todos los precios para continuar.
+      Hay productos con precio yoel pero sin precio Laura. Debes completar todos los precios para continuar.
     </div>
     <div id="preciosLauraObligatorioCount" class="precios-laura-obligatorio-count">0 productos pendientes</div>
     <div id="preciosLauraObligatorioLista" class="precios-laura-obligatorio-lista"></div>
@@ -399,8 +399,8 @@
           </div>
 
           <div class="producto-stat">
-            <strong>Bea €</strong>
-            <span id="productoModalBea">0.00</span>
+            <strong>yoel €</strong>
+            <span id="productoModalyoel">0.00</span>
           </div>
 
           <div class="producto-stat">
@@ -497,7 +497,7 @@ const logsRef = ref(db, "logs");
 const backupRef = ref(db, "backup/ultimo");
 
 let productos = {};
-let totalesGlobales = { bea: 0, laura: 0, vendidos: 0, reservados: 0 };
+let totalesGlobales = { yoel: 0, laura: 0, vendidos: 0, reservados: 0 };
 let editId = null;
 let ocultosIndexCount = 0;
 let currentUser = null;
@@ -1627,7 +1627,7 @@ window.renderOcultosIndex = () => {
       <td>${Number(p?.proximo || 0)}</td>
       <td>${Number(p?.reservados || 0)}</td>
       <td>${Number(p?.vendidos || 0)}</td>
-      <td>${Number(p?.bea || 0).toFixed(2)}</td>
+      <td>${Number(p?.yoel || 0).toFixed(2)}</td>
       <td>${Number(p?.laura || 0).toFixed(2)}</td>
       <td>
         <button class="green" onclick="toggleOcultoIndex('${id}', false)">👁️ Mostrar en index</button>
@@ -1731,7 +1731,7 @@ window.renderTablaSolo = () => {
   ${(p.vendidos || 0) > 0 ? `<button class="undo-btn" onclick="eliminarUnaVenta('${id}')" title="Eliminar 1 venta">↩️</button>` : ''}
 </td>
 
-<td>${Number(p.bea || 0).toFixed(2)}</td>
+<td>${Number(p.yoel || 0).toFixed(2)}</td>
 
 <td class="editable laura-negro">
   <div class="precio-wrap">
@@ -1790,25 +1790,25 @@ window.eliminarUnaVenta = async (id) => {
 
   openConfirm({
     title: '↩️ Corregir venta',
-    message: `Se eliminará 1 venta de "${p.nombre}", volverá 1 unidad al stock y se descontarán los importes de Bea y Laura.`,
+    message: `Se eliminará 1 venta de "${p.nombre}", volverá 1 unidad al stock y se descontarán los importes de yoel y Laura.`,
     confirmText: 'Corregir',
     onConfirm: async () => {
       const nuevoStock = Number(p.stock || 0) + 1;
       const nuevosVendidos = vendidos - 1;
-      const nuevoVBea = Math.max(0, Number(p.vBea || 0) - Number(p.bea || 0));
+      const nuevoVyoel = Math.max(0, Number(p.vyoel || 0) - Number(p.yoel || 0));
       const nuevoVLaura = Math.max(0, Number(p.vLaura || 0) - Number(p.laura || 0));
 
       await update(ref(db, 'productos/' + id), {
         stock: nuevoStock,
         vendidos: nuevosVendidos,
-        vBea: nuevoVBea,
+        vyoel: nuevoVyoel,
         vLaura: nuevoVLaura,
         emailAgotadoEnviado:false
       });
 
       productos[id].stock = nuevoStock;
       productos[id].vendidos = nuevosVendidos;
-      productos[id].vBea = nuevoVBea;
+      productos[id].vyoel = nuevoVyoel;
       productos[id].vLaura = nuevoVLaura;
       productos[id].emailAgotadoEnviado = false;
 
@@ -1822,9 +1822,9 @@ window.eliminarUnaVenta = async (id) => {
         currentUser.email,
         `Stock devuelto: ${nuevoStock}`,
         {
-          precioBea: Number(p.bea || 0),
+          precioyoel: Number(p.yoel || 0),
           precioLaura: Number(p.laura || 0),
-          totalBea: Number(p.bea || 0),
+          totalyoel: Number(p.yoel || 0),
           totalLaura: Number(p.laura || 0)
         }
       );
@@ -2132,17 +2132,17 @@ function loadData() {
       window.history.replaceState({}, '', url.toString());
     }
 
-    totalesGlobales.bea = 0;
+    totalesGlobales.yoel = 0;
     totalesGlobales.laura = 0;
     totalesGlobales.vendidos = 0;
     totalesGlobales.reservados = 0;
 
     Object.values(productos).forEach(p => {
-      const vBeaReal = Number(p.vBea || 0);
+      const vyoelReal = Number(p.vyoel || 0);
       const vLauraReal = Number(p.vLaura || 0);
       const vendidosReal = Number(p.vendidos || 0);
       const reservadosReal = Number(p.reservados || 0);
-      totalesGlobales.bea += vBeaReal;
+      totalesGlobales.yoel += vyoelReal;
       totalesGlobales.laura += vLauraReal;
       totalesGlobales.vendidos += vendidosReal;
       totalesGlobales.reservados += reservadosReal;
@@ -2156,7 +2156,7 @@ function loadData() {
       }
     }
 
-    actualizarTotales(totalesGlobales.bea, totalesGlobales.laura, totalesGlobales.vendidos, totalesGlobales.reservados);
+    actualizarTotales(totalesGlobales.yoel, totalesGlobales.laura, totalesGlobales.vendidos, totalesGlobales.reservados);
     programarRender();
     actualizarPanelOcultosIndex();
     refrescarFichaProductoSiAbierta();
@@ -2171,9 +2171,9 @@ function loadData() {
 
 function obtenerProductosSinPrecioLaura() {
   return Object.entries(productos || {}).filter(([id, p]) => {
-    const bea = Number(p?.bea || 0);
+    const yoel = Number(p?.yoel || 0);
     const laura = Number(p?.laura || 0);
-    return bea > 0 && laura <= 0;
+    return yoel > 0 && laura <= 0;
   }).sort((a, b) => String(a[1]?.nombre || '').localeCompare(String(b[1]?.nombre || ''), 'es'));
 }
 
@@ -2215,7 +2215,7 @@ window.mostrarModalPreciosLauraObligatorio = () => {
   lista.innerHTML = pendientes.map(([id, p]) => {
     const nombre = escaparHtml(p?.nombre || '');
     const imagen = String(p?.imagen || '').trim();
-    const bea = Number(p?.bea || 0).toFixed(2);
+    const yoel = Number(p?.yoel || 0).toFixed(2);
 
     return `
       <div class="precio-laura-obligatorio-item">
@@ -2228,7 +2228,7 @@ window.mostrarModalPreciosLauraObligatorio = () => {
 
         <div class="precio-laura-obligatorio-info">
           <div class="precio-laura-obligatorio-nombre">${nombre}</div>
-          <div class="precio-laura-obligatorio-bea">Bea: €${bea}</div>
+          <div class="precio-laura-obligatorio-yoel">yoel: €${yoel}</div>
         </div>
 
         <div class="precio-laura-obligatorio-input-wrap">
@@ -2344,9 +2344,9 @@ function ordenarProductos(productosObj) {
         valorA = Number(pA[campo] || 0);
         valorB = Number(pB[campo] || 0);
         break;
-      case 'bea':
-        valorA = Number(pA.bea || 0);
-        valorB = Number(pB.bea || 0);
+      case 'yoel':
+        valorA = Number(pA.yoel || 0);
+        valorB = Number(pB.yoel || 0);
         break;
       case 'laura':
         valorA = Number(pA.laura || 0);
@@ -2361,17 +2361,17 @@ function ordenarProductos(productosObj) {
   });
 }
 
-function actualizarTotales(totalBea, totalLaura, totalVendidos, totalReservados) {
-  document.getElementById('tBeaSup').textContent = `€${totalBea.toFixed(2)}`;
+function actualizarTotales(totalyoel, totalLaura, totalVendidos, totalReservados) {
+  document.getElementById('tyoelSup').textContent = `€${totalyoel.toFixed(2)}`;
   document.getElementById('tLauraSup').textContent = `€${totalLaura.toFixed(2)}`;
   document.getElementById('tTotalReservadosSup').textContent = totalReservados;
   document.getElementById('tTotalVendidosSup').textContent = totalVendidos;
-  document.getElementById('tBea').textContent = `€${totalBea.toFixed(2)}`;
+  document.getElementById('tyoel').textContent = `€${totalyoel.toFixed(2)}`;
   document.getElementById('tLaura').textContent = `€${totalLaura.toFixed(2)}`;
   document.getElementById('tTotalReservados').textContent = totalReservados;
   document.getElementById('tTotalVendidos').textContent = totalVendidos;
 
-  const diferencia = totalLaura - totalBea;
+  const diferencia = totalLaura - totalyoel;
   const diferenciaSup = document.getElementById('tDiferenciaSup');
   const diferenciaBoxSup = document.getElementById('diferenciaBoxSup');
   const diferenciaInf = document.getElementById('tDiferencia');
@@ -2382,7 +2382,7 @@ function actualizarTotales(totalBea, totalLaura, totalVendidos, totalReservados)
 
   if (diferencia > 0) {
     diferenciaSup.className = 'diferencia-positiva';
-    diferenciaBoxSup.className = 'total-box-superior diferencia bea';
+    diferenciaBoxSup.className = 'total-box-superior diferencia yoel';
     diferenciaInf.className = 'diferencia-positiva';
     diferenciaBoxInf.className = 'total-box diferencia-positiva';
   } else if (diferencia < 0) {
@@ -2573,20 +2573,20 @@ window.venderReserva = async (id) => {
 
       const nuevosReservados = Math.max(0, Number(p.reservados || 0) - cantidad);
       const nuevosVendidos = Number(p.vendidos || 0) + cantidad;
-      const nuevoVBea = Number(p.vBea || 0) + Number(p.bea || 0) * cantidad;
+      const nuevoVyoel = Number(p.vyoel || 0) + Number(p.yoel || 0) * cantidad;
       const nuevoVLaura = Number(p.vLaura || 0) + Number(p.laura || 0) * cantidad;
 
       await update(ref(db, 'productos/' + id), {
         reservados: nuevosReservados,
         vendidos: nuevosVendidos,
-        vBea: nuevoVBea,
+        vyoel: nuevoVyoel,
         vLaura: nuevoVLaura,
         reservasDetalle: reservas
       });
 
       productos[id].reservados = nuevosReservados;
       productos[id].vendidos = nuevosVendidos;
-      productos[id].vBea = nuevoVBea;
+      productos[id].vyoel = nuevoVyoel;
       productos[id].vLaura = nuevoVLaura;
       productos[id].reservasDetalle = reservas;
 
@@ -2618,14 +2618,14 @@ window.vender = async (id, cant) => {
   await update(ref(db,'productos/'+id), {
     stock: nuevoStock,
     vendidos: Number(p.vendidos || 0) + cant,
-    vBea: Number(p.vBea || 0) + Number(p.bea || 0) * cant,
+    vyoel: Number(p.vyoel || 0) + Number(p.yoel || 0) * cant,
     vLaura: Number(p.vLaura || 0) + Number(p.laura || 0) * cant,
     ...(debeMarcarAgotado ? { emailAgotadoEnviado:true } : {})
   });
 
   productos[id].stock = nuevoStock;
   productos[id].vendidos = Number(p.vendidos || 0) + cant;
-  productos[id].vBea = Number(p.vBea || 0) + Number(p.bea || 0) * cant;
+  productos[id].vyoel = Number(p.vyoel || 0) + Number(p.yoel || 0) * cant;
   productos[id].vLaura = Number(p.vLaura || 0) + Number(p.laura || 0) * cant;
   if (debeMarcarAgotado) productos[id].emailAgotadoEnviado = true;
 
@@ -2637,11 +2637,11 @@ window.vender = async (id, cant) => {
     p.nombre,
     cant,
     currentUser.email,
-    `Bea:€${Number(p.bea || 0).toFixed(2)} Laura:€${Number(p.laura || 0).toFixed(2)}`,
+    `yoel:€${Number(p.yoel || 0).toFixed(2)} Laura:€${Number(p.laura || 0).toFixed(2)}`,
     {
-      precioBea: Number(p.bea || 0),
+      precioyoel: Number(p.yoel || 0),
       precioLaura: Number(p.laura || 0),
-      totalBea: Number(p.bea || 0) * cant,
+      totalyoel: Number(p.yoel || 0) * cant,
       totalLaura: Number(p.laura || 0) * cant
     }
   );
@@ -2649,7 +2649,7 @@ window.vender = async (id, cant) => {
   await enviarEmail({
     producto:p.nombre,
     stock:nuevoStock,
-    detalles:`${cant} uds. | Bea: €${Number(p.bea || 0).toFixed(2)} | Laura: €${Number(p.laura || 0).toFixed(2)}`,
+    detalles:`${cant} uds. | yoel: €${Number(p.yoel || 0).toFixed(2)} | Laura: €${Number(p.laura || 0).toFixed(2)}`,
     subject:'🛍️ VENTA - ' + p.nombre,
     fecha:new Date().toLocaleString('es-ES')
   });
@@ -2658,7 +2658,7 @@ window.vender = async (id, cant) => {
     await enviarEmail({
       producto:p.nombre,
       stock:0,
-      detalles:`⚠️ PRODUCTO AGOTADO | Bea: €${Number(p.bea || 0).toFixed(2)} | Laura: €${Number(p.laura || 0).toFixed(2)}`,
+      detalles:`⚠️ PRODUCTO AGOTADO | yoel: €${Number(p.yoel || 0).toFixed(2)} | Laura: €${Number(p.laura || 0).toFixed(2)}`,
       subject:'⚠️ AGOTADO - ' + p.nombre,
       fecha:new Date().toLocaleString('es-ES')
     });
@@ -2751,12 +2751,12 @@ console.log('Prueba guardado...')
       nombre,
       stock: Math.max(0, Number(document.getElementById('stock').value) || 0),
       proximo: Math.max(0, Number(document.getElementById('proximo').value) || 0),
-      bea: Math.max(0, Number(document.getElementById('bea').value) || 0),
+      yoel: Math.max(0, Number(document.getElementById('yoel').value) || 0),
       laura: Math.max(0, Number(document.getElementById('laura').value) || 0),
       imagen: imagenActual,
       vendidos: editId ? Number(productos[editId]?.vendidos || 0) : 0,
       reservados: editId ? Number(productos[editId]?.reservados || 0) : 0,
-      vBea: editId ? Number(productos[editId]?.vBea || 0) : 0,
+      vyoel: editId ? Number(productos[editId]?.vyoel || 0) : 0,
       vLaura: editId ? Number(productos[editId]?.vLaura || 0) : 0,
       reservasDetalle: editId ? (Array.isArray(productos[editId]?.reservasDetalle) ? productos[editId].reservasDetalle : []) : [],
       emailAgotadoEnviado: editId ? !!productos[editId]?.emailAgotadoEnviado : false,
@@ -2841,7 +2841,7 @@ window.editar = (id) => {
   document.getElementById('nombre').value = p.nombre || '';
   document.getElementById('stock').value = p.stock || 0;
   document.getElementById('proximo').value = p.proximo || 0;
-  document.getElementById('bea').value = p.bea || 0;
+  document.getElementById('yoel').value = p.yoel || 0;
   document.getElementById('laura').value = p.laura || 0;
   document.getElementById('fotoProducto').value = '';
   editId = id;
@@ -2904,12 +2904,12 @@ window.resetear = () => {
     onConfirm: async () => {
       const updates = {};
       Object.entries(productos).forEach(([id]) => {
-        updates[`productos/${id}/vBea`] = 0;
+        updates[`productos/${id}/vyoel`] = 0;
         updates[`productos/${id}/vLaura`] = 0;
         updates[`productos/${id}/vendidos`] = 0;
         updates[`productos/${id}/reservados`] = 0;
         updates[`productos/${id}/emailAgotadoEnviado`] = false;
-        productos[id].vBea = 0;
+        productos[id].vyoel = 0;
         productos[id].vLaura = 0;
         productos[id].vendidos = 0;
         productos[id].reservados = 0;
@@ -2948,7 +2948,7 @@ window.abrirFichaProducto = (id) => {
   document.getElementById('productoModalProximo').textContent = Number(p.proximo || 0);
   document.getElementById('productoModalReservados').textContent = Number(p.reservados || 0);
   document.getElementById('productoModalVendidos').textContent = Number(p.vendidos || 0);
-  document.getElementById('productoModalBea').textContent = Number(p.bea || 0).toFixed(2);
+  document.getElementById('productoModalyoel').textContent = Number(p.yoel || 0).toFixed(2);
   document.getElementById('productoModalLaura').textContent = Number(p.laura || 0).toFixed(2);
 
   const img = document.getElementById('productoModalImg');
@@ -3153,7 +3153,7 @@ window.refrescarFichaProductoSiAbierta = () => {
   document.getElementById('productoModalProximo').textContent = Number(p.proximo || 0);
   document.getElementById('productoModalReservados').textContent = Number(p.reservados || 0);
   document.getElementById('productoModalVendidos').textContent = Number(p.vendidos || 0);
-  document.getElementById('productoModalBea').textContent = Number(p.bea || 0).toFixed(2);
+  document.getElementById('productoModalyoel').textContent = Number(p.yoel || 0).toFixed(2);
   document.getElementById('productoModalLaura').textContent = Number(p.laura || 0).toFixed(2);
 
   const img = document.getElementById('productoModalImg');
@@ -3174,7 +3174,7 @@ function limpiarFormulario() {
   document.getElementById('nombre').value = '';
   document.getElementById('stock').value = '';
   document.getElementById('proximo').value = '';
-  document.getElementById('bea').value = '';
+  document.getElementById('yoel').value = '';
   document.getElementById('laura').value = '';
   document.getElementById('fotoProducto').value = '';
   editId = null;
