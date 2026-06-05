@@ -2201,6 +2201,9 @@ window.mostrarModalPreciosLauraObligatorio = () => {
   const lista = document.getElementById('preciosLauraObligatorioLista');
   const count = document.getElementById('preciosLauraObligatorioCount');
   const pendientes = obtenerProductosSinPrecioLaura();
+  const cancelBtn = document.getElementById('modalCancelBtn');
+  
+  cancelBtn.onclick = closeModal;
 
   if (!lista || !count) return;
 
