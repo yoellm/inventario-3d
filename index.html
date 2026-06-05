@@ -2730,6 +2730,7 @@ window.modificarStock = (id) => {
 };
 
 window.guardar = async () => {
+console.log('Prueba guardado...')
   if (userRole !== 'admin') return alert('✖ Solo ADMIN puede crear/editar');
   const nombre = document.getElementById('nombre').value.trim();
   if (!nombre) return alert('✖ Nombre requerido');
