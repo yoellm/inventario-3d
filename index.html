@@ -2769,6 +2769,7 @@ console.log('Prueba guardado...')
       limpiarFormulario();
       showToast('✅ Actualizado', 'success');
     } else {
+	  console.log(data)
       const newRef = await push(productosRef, data);
       productos[newRef.key] = data;
       await syncProductoPublico(newRef.key, data);
