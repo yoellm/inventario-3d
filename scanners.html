@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Información del producto</title>
+  <style>
+    :root{
+      --bg:#eef3ff;
+      --surface:#ffffff;
+      --surface-2:#f8fbff;
+      --border:#dbe4f0;
+      --text:#0f172a;
+      --muted:#64748b;
+
+      --primary:#2563eb;
+      --primary-hover:#1d4ed8;
+      --success:#16a34a;
+      --success-hover:#15803d;
+      --danger:#dc2626;
+      --danger-hover:#b91c1c;
+      --info:#0891b2;
+      --info-hover:#0e7490;
+      --purple:#7c3aed;
+      --purple-hover:#6d28d9;
+      --warning:#f59e0b;
+      --warning-hover:#d97706;
+
+      --shadow-sm:0 8px 20px rgba(15,23,42,.08);
+      --shadow:0 14px 32px rgba(15,23,42,.10);
+      --shadow-lg:0 22px 60px rgba(15,23,42,.16);
+
+      --radius:22px;
+      --radius-sm:14px;
+      --transition:.22s ease;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(37,99,235,.11), transparent 26%),
+        radial-gradient(circle at 100% 0%, rgba(124,58,237,.11), transparent 24%),
+        radial-gradient(circle at 50% 100%, rgba(8,145,178,.08), transparent 25%),
+        linear-gradient(180deg,#f8fbff 0%, #edf3fb 100%);
+      padding:20px;
+      max-width:980px;
+      margin:0 auto;
+    }
+
+    .hidden{display:none !important}
+
+    .app-header{
+      position:relative;
+      display:flex;
+      align-items:center;
+      gap:18px;
+      margin:0 0 20px 0;
+      padding:20px 24px;
+      border-radius:28px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255,255,255,.22), transparent 16%),
+        radial-gradient(circle at 88% 20%, rgba(255,255,255,.14), transparent 18%),
+        linear-gradient(135deg,#1d4ed8 0%, #2563eb 42%, #4f46e5 78%, #7c3aed 100%);
+      box-shadow:
+        0 24px 56px rgba(37,99,235,.28),
+        0 10px 28px rgba(15,23,42,.12);
+    }
+
+    .app-header::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0));
+      pointer-events:none;
+    }
+
+    .logo-app{
+      position:relative;
+      z-index:1;
+      width:92px;
+      height:92px;
+      object-fit:contain;
+      display:block;
+      flex-shrink:0;
+      border-radius:18px;
+      background:rgba(255,255,255,.14);
+      padding:8px;
+      box-shadow:0 8px 18px rgba(0,0,0,.12);
+    }
+
+    .app-header-text{
+      position:relative;
+      z-index:1;
+      min-width:0;
+    }
+
+    .app-header h1{
+      margin:0;
+      color:#fff;
+      font-size:32px;
+      line-height:1.12;
+      letter-spacing:-.03em;
+    }
+
+    .app-subtitle{
+      margin:8px 0 0 0;
+      color:rgba(255,255,255,.88);
+      font-size:14px;
+      font-weight:600;
+      letter-spacing:.02em;
+    }
+
+    .card{
+      position:relative;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);
+      padding:22px;
+      border-radius:24px;
+      margin-bottom:18px;
+      border:1px solid rgba(255,255,255,.7);
+      box-shadow:var(--shadow);
+      transition:transform var(--transition), box-shadow var(--transition);
+      animation:fadeIn .25s ease;
+    }
+
+    .card:hover{
+      transform:translateY(-2px);
+      box-shadow:var(--shadow-lg);
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(8px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    .card-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:16px;
+    }
+
+    .card-head h2{
+      margin:0 0 6px 0;
+      font-size:24px;
+      color:#13233f;
+      letter-spacing:-.02em;
+    }
+
+    .card-head p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    button{
+      padding:10px 14px;
+      border:none;
+      border-radius:14px;
+      background:linear-gradient(135deg,#2563eb,#4f46e5);
+      color:#fff;
+      cursor:pointer;
+      font-weight:800;
+      font-size:13px;
+      box-shadow:0 8px 18px rgba(37,99,235,.18);
+      transition:transform var(--transition), box-shadow var(--transition), filter var(--transition);
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+      box-shadow:0 12px 22px rgba(37,99,235,.24);
+      filter:saturate(1.05);
+    }
+
+    .green{background:linear-gradient(135deg,#22c55e,#16a34a)}
+    .green:hover{box-shadow:0 12px 22px rgba(34,197,94,.22)}
+    .red{background:linear-gradient(135deg,#ef4444,#dc2626)}
+    .red:hover{box-shadow:0 12px 22px rgba(220,38,38,.22)}
+    .cyan{background:linear-gradient(135deg,#06b6d4,#0891b2)}
+    .cyan:hover{box-shadow:0 12px 22px rgba(8,145,178,.22)}
+    .gray{background:linear-gradient(135deg,#64748b,#475569)}
+    .gray:hover{box-shadow:0 12px 22px rgba(71,85,105,.22)}
+
+    .toolbar,
+    .acciones{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .toolbar button,
+    .acciones button{
+      min-height:46px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+    }
+
+    #reader{
+      width:100%;
+      max-width:520px;
+      margin:0 auto;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:var(--shadow-sm);
+      background:#fff;
+    }
+
+    #scanCard{
+      padding:16px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .stat{
+      background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);
+      border:1px solid var(--border);
+      padding:14px;
+      border-radius:16px;
+      font-weight:800;
+      box-shadow:0 4px 12px rgba(15,23,42,.04);
+    }
+
+    .stat .value{
+      display:block;
+      font-size:24px;
+      margin-top:8px;
+      line-height:1.1;
+    }
+
+    .producto{
+      border:2px solid #dbeafe;
+      background:linear-gradient(180deg,#f8fbff 0%,#eff6ff 100%);
+    }
+
+    .info,
+    .error,
+    .success{
+      padding:13px 14px;
+      border-radius:14px;
+      font-weight:700;
+    }
+
+    .info{
+      background:#e8f4fd;
+      border:1px solid #bee5eb;
+      color:#0f4c5c;
+    }
+
+    .error{
+      background:#f8d7da;
+      border:1px solid #f5c6cb;
+      color:#721c24;
+    }
+
+    .success{
+      background:#d4edda;
+      border:1px solid #c3e6cb;
+      color:#155724;
+    }
+
+    .small{
+      font-size:13px;
+      color:#6b7280;
+      font-weight:600;
+    }
+
+    input{
+      padding:10px 12px;
+      border:1px solid #d1d5db;
+      border-radius:12px;
+      font-size:15px;
+      width:90px;
+      text-align:center;
+      background:#fff;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    .qty-wrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:14px;
+      font-weight:700;
+      color:#334155;
+    }
+
+    .public-card{
+      border:2px solid #e5e7eb;
+      background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+      text-align:center;
+      overflow:hidden;
+    }
+
+    .public-card::before,
+    .producto::before,
+    #scanCard::before{
+      content:"";
+      position:absolute;
+      inset:0 0 auto 0;
+      height:5px;
+      border-radius:24px 24px 0 0;
+      background:linear-gradient(90deg,#2563eb,#4f46e5,#06b6d4);
+    }
+
+    .public-title{
+      font-size:18px;
+      font-weight:800;
+      color:#475569;
+      margin-bottom:14px;
+    }
+
+    .public-name{
+      font-size:36px;
+      font-weight:900;
+      line-height:1.12;
+      margin-bottom:18px;
+      color:#111827;
+      letter-spacing:-.03em;
+    }
+
+    .public-price-wrap{
+      background:linear-gradient(135deg,#111827,#1f2937);
+      color:#fff;
+      border-radius:18px;
+      padding:20px;
+      margin-bottom:16px;
+      box-shadow:0 14px 28px rgba(15,23,42,.18);
+    }
+
+    .public-price-label{
+      font-size:14px;
+      opacity:.9;
+      margin-bottom:8px;
+      font-weight:700;
+    }
+
+    .public-price{
+      font-size:56px;
+      font-weight:900;
+      line-height:1;
+      letter-spacing:-.03em;
+    }
+
+    .public-stock{
+      display:inline-block;
+      padding:12px 18px;
+      border-radius:999px;
+      font-size:20px;
+      font-weight:900;
+      margin-top:6px;
+    }
+
+    .stock-ok{
+      background:#d1fae5;
+      color:#065f46;
+      border:2px solid #10b981;
+    }
+
+    .stock-low{
+      background:#fef3c7;
+      color:#92400e;
+      border:2px solid #f59e0b;
+    }
+
+    .stock-out{
+      background:#fee2e2;
+      color:#991b1b;
+      border:2px solid #ef4444;
+    }
+
+    .public-note{
+      margin-top:16px;
+      font-size:13px;
+      color:#64748b;
+      font-weight:700;
+    }
+
+    .logo-card-wrap{
+      display:flex;
+      justify-content:center;
+      margin-bottom:14px;
+    }
+
+    .logo-card{
+      width:88px;
+      height:88px;
+      object-fit:contain;
+      border-radius:18px;
+      background:#fff;
+      padding:8px;
+      border:1px solid #e5e7eb;
+      box-shadow:0 8px 18px rgba(15,23,42,.08);
+    }
+
+    .foto-producto-wrap,
+    .foto-privada-wrap{
+      display:flex;
+      justify-content:center;
+      margin-bottom:16px;
+    }
+
+    .foto-producto{
+      width:220px;
+      height:220px;
+      object-fit:cover;
+      border-radius:20px;
+      border:2px solid #e5e7eb;
+      background:#fff;
+      box-shadow:0 10px 22px rgba(0,0,0,.08);
+    }
+
+    .foto-privada{
+      width:180px;
+      height:180px;
+      object-fit:cover;
+      border-radius:18px;
+      border:2px solid #dbeafe;
+      background:#fff;
+      box-shadow:0 10px 22px rgba(0,0,0,.08);
+    }
+.foto-clickable{
+  cursor:pointer;
+  transition:transform var(--transition), box-shadow var(--transition), filter var(--transition);
+}
+
+.foto-clickable:hover{
+  transform:scale(1.04);
+  box-shadow:0 16px 30px rgba(0,0,0,.16);
+  filter:saturate(1.04);
+}
+
+.foto-modal{
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  background:rgba(15,23,42,.82);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  backdrop-filter:blur(4px);
+}
+
+.foto-modal-content{
+  max-width:95vw;
+  max-height:92vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#fotoModalImg{
+  max-width:95vw;
+  max-height:92vh;
+  object-fit:contain;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 24px 60px rgba(0,0,0,.35);
+}
+    @media (max-width:700px){
+      .grid{grid-template-columns:1fr}
+      body{padding:10px}
+
+      .app-header{
+        gap:12px;
+        padding:16px;
+        border-radius:22px;
+      }
+
+      .logo-app{
+        width:68px;
+        height:68px;
+      }
+
+      .app-header h1{
+        font-size:22px;
+        line-height:1.18;
+      }
+
+      .app-subtitle{
+        font-size:12px;
+      }
+
+      .public-name{font-size:28px}
+      .public-price{font-size:42px}
+      .foto-producto{width:180px;height:180px}
+      .foto-privada{width:150px;height:150px}
+      .logo-card{width:72px;height:72px}
+
+      .toolbar,
+      .acciones{
+        flex-direction:column;
+      }
+
+      .toolbar button,
+      .acciones button{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-header">
+    <img src="logo.png" alt="Logo Mundo Azul" class="logo-app">
+    <div class="app-header-text">
+      <h1>📦 Información del producto</h1>
+      <p class="app-subtitle">Escáner · Consulta pública · Venta rápida · Reserva rápida</p>
+    </div>
+  </div>
+
+  <div class="card hidden public-card" id="publicCard">
+    <div class="logo-card-wrap">
+      <img src="logo.png" alt="Logo Mundo Azul" class="logo-card">
+    </div>
+
+    <div class="public-title">Información del producto</div>
+
+    <div id="publicImagenWrap" class="foto-producto-wrap"></div>
+
+    <div class="public-name" id="publicNombre">-</div>
+
+    <div class="public-price-wrap">
+      <div class="public-price-label">Precio venta</div>
+      <div class="public-price" id="publicPrecio">€0.00</div>
+    </div>
+
+    <div id="publicStockBadge" class="public-stock stock-ok">Stock disponible: 0</div>
+
+    <div class="public-note">
+      Modo consulta pública. Para vender o reservar necesitas iniciar sesión.
+    </div>
+  </div>
+
+  <div class="card hidden producto" id="productoCard">
+    <div class="card-head">
+      <div>
+        <h2>🛒 Venta rápida</h2>
+        <p>Producto listo para vender o reservar desde el escáner.</p>
+      </div>
+    </div>
+
+    <div class="logo-card-wrap">
+      <img src="logo.png" alt="Logo Mundo Azul" class="logo-card">
+    </div>
+
+    <div id="privadaImagenWrap" class="foto-privada-wrap"></div>
+
+    <div class="grid">
+      <div class="stat">Producto<span class="value" id="prodNombre">-</span></div>
+      <div class="stat">Stock<span class="value" id="prodStock">0</span></div>
+      <div class="stat">Precio Bea<span class="value" id="prodBea">€0.00</span></div>
+      <div class="stat">Precio Laura<span class="value" id="prodLaura">€0.00</span></div>
+    </div>
+
+    <div class="qty-wrap">
+      <label for="cantidad">Cantidad</label>
+      <input id="cantidad" type="number" min="1" value="1">
+    </div>
+
+    <div class="acciones">
+      <button class="green" onclick="venderRapido()">🛒 Vender</button>
+      <button class="cyan" onclick="reservarRapido()">⏳ Reservar</button>
+      <button class="red" onclick="limpiarProducto()">❌ Cerrar ficha</button>
+    </div>
+
+    <div id="accionStatus" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>🔍 Escanear o buscar</h2>
+        <p>Escanea el QR o busca el producto manualmente.</p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button onclick="iniciarEscaner()">📷 Escanear producto</button>
+      <button class="gray" onclick="detenerEscaner()">⏹️ Parar cámara</button>
+      <button class="cyan" onclick="buscarManual()">⌨️ Buscar manual</button>
+    </div>
+    <p class="small">Si entras desde un QR con enlace, el producto se abrirá automáticamente.</p>
+  </div>
+
+  <div class="card hidden" id="scanCard">
+    <div id="reader"></div>
+    <div id="scanStatus" class="info" style="margin-top:12px">Apunta al QR del producto.</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getDatabase, ref, get, update, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: 'AIzaSyBYKEUjEi8TDwJ79l1QU67BNAPn7QOsKV4',
+      authDomain: 'inventario-laura.firebaseapp.com',
+      databaseURL: 'https://inventario-laura-default-rtdb.europe-west1.firebasedatabase.app',
+      projectId: 'inventario-laura',
+      storageBucket: 'inventario-laura.firebasestorage.app',
+      messagingSenderId: '778807935660',
+      appId: '1:778807935660:web:947e223465f9347b17d509'
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const productosRef = ref(db, 'productos');
+    const productosPublicosRef = ref(db, 'productos_publicos');
+    const logsRef = ref(db, 'logs');
+
+    let scanner = null;
+    let productoActual = null;
+    let currentUser = null;
+
+    function getQueryParam(name){
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    function setStatus(id, text, kind = 'info') {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = kind;
+      el.textContent = text;
+    }
+
+    function tieneSesionValida(user){
+      return !!user;
+    }
+
+    function ocultarFichas(){
+      document.getElementById('productoCard').classList.add('hidden');
+      document.getElementById('publicCard').classList.add('hidden');
+      document.getElementById('publicImagenWrap').innerHTML = '';
+      document.getElementById('privadaImagenWrap').innerHTML = '';
+    }
+
+function renderImagenPublica(url){
+  const wrap = document.getElementById('publicImagenWrap');
+  wrap.innerHTML = '';
+  if (!url) return;
+  wrap.innerHTML = `<img src="${url}" alt="Foto producto" class="foto-producto foto-clickable" onclick="abrirFotoGrande('${url}')">`;
+}
+
+function renderImagenPrivada(url){
+  const wrap = document.getElementById('privadaImagenWrap');
+  wrap.innerHTML = '';
+  if (!url) return;
+  wrap.innerHTML = `<img src="${url}" alt="Foto producto" class="foto-privada foto-clickable" onclick="abrirFotoGrande('${url}')">`;
+}
+
+    function renderPublico(p){
+      ocultarFichas();
+      document.getElementById('publicCard').classList.remove('hidden');
+      renderImagenPublica(p.imagen || '');
+      document.getElementById('publicNombre').textContent = p.nombre || '-';
+      document.getElementById('publicPrecio').textContent = `€${Number(p.laura || 0).toFixed(2)}`;
+
+      const stock = Number(p.stock || 0);
+      const badge = document.getElementById('publicStockBadge');
+      badge.textContent = `Stock disponible: ${stock}`;
+
+      if (stock <= 0) {
+        badge.className = 'public-stock stock-out';
+      } else if (stock <= 5) {
+        badge.className = 'public-stock stock-low';
+      } else {
+        badge.className = 'public-stock stock-ok';
+      }
+    }
+
+ async function pintarProducto(p, origen = 'consulta') {
+  productoActual = p;
+  ocultarFichas();
+
+  if (!tieneSesionValida(currentUser)) {
+    renderPublico(p);
+    setStatus('scanStatus', `Producto detectado: ${p.nombre}`, 'success');
+    return;
+  }
+
+  document.getElementById('productoCard').classList.remove('hidden');
+  renderImagenPrivada(p.imagen || '');
+  document.getElementById('prodNombre').textContent = p.nombre || '-';
+  document.getElementById('prodStock').textContent = Number(p.stock || 0);
+  document.getElementById('prodBea').textContent = `€${Number(p.bea || 0).toFixed(2)}`;
+  document.getElementById('prodLaura').textContent = `€${Number(p.laura || 0).toFixed(2)}`;
+  document.getElementById('cantidad').value = 1;
+  setStatus('accionStatus', 'Producto listo para vender o reservar.', 'info');
+
+  if (['qr', 'manual', 'url'].includes(origen)) {
+    try {
+      await guardarLog(
+        'consulta-producto',
+        p.id,
+        p.nombre,
+        0,
+        currentUser.email,
+        `Consulta desde scanner (${origen})`
+      );
+    } catch (e) {
+      console.error('Error guardando log de consulta', e);
+    }
+  }
+}
+
+    async function obtenerIP(){
+      try{
+        const cache = sessionStorage.getItem('inventario_ip');
+        if(cache) return cache;
+        const r = await fetch('https://api.ipify.org?format=json');
+        const data = await r.json();
+        const ip = data.ip || 'IP desconocida';
+        sessionStorage.setItem('inventario_ip', ip);
+        return ip;
+      }catch{
+        return 'IP desconocida';
+      }
+    }
+
+    function obtenerDispositivo(){
+      try{
+        return navigator.userAgent || 'Dispositivo desconocido';
+      }catch{
+        return 'Dispositivo desconocido';
+      }
+    }
+
+    async function guardarLog(tipo, productoId, productoNombre, cantidad, usuario, detalles = '', extras = {}) {
+      const ip = await obtenerIP();
+      await push(logsRef, {
+        timestamp: Date.now(),
+        tipo,
+        productoId,
+        productoNombre: productoNombre || '',
+        cantidad: Number(cantidad || 0),
+        usuario: usuario || '',
+        detalles,
+        ip,
+        dispositivo: obtenerDispositivo(),
+        fecha: new Date().toLocaleString('es-ES'),
+        ...extras
+      });
+    }
+
+    async function buscarProductoPrivadoPorContenidoQR(contenido) {
+      const texto = String(contenido || '').trim();
+      const snap = await get(productosRef);
+      const productos = snap.val() || {};
+
+      if (productos[texto]) return { id: texto, ...productos[texto] };
+
+      try {
+        const url = new URL(texto);
+        const scanId = url.searchParams.get('scanId') || url.searchParams.get('editId');
+        if (scanId && productos[scanId]) return { id: scanId, ...productos[scanId] };
+      } catch {}
+
+      if (texto.startsWith('PROD:')) {
+        const id = texto.replace('PROD:', '').trim();
+        if (productos[id]) return { id, ...productos[id] };
+      }
+
+      const lower = texto.toLowerCase();
+      for (const [id, p] of Object.entries(productos)) {
+        if (String(p?.nombre || '').toLowerCase() === lower) {
+          return { id, ...p };
+        }
+      }
+
+      return null;
+    }
+
+    async function buscarProductoPublicoPorContenidoQR(contenido) {
+      const texto = String(contenido || '').trim();
+      const snap = await get(productosPublicosRef);
+      const productos = snap.val() || {};
+
+      if (productos[texto]) return { id: texto, ...productos[texto] };
+
+      try {
+        const url = new URL(texto);
+        const scanId = url.searchParams.get('scanId') || url.searchParams.get('editId');
+        if (scanId && productos[scanId]) return { id: scanId, ...productos[scanId] };
+      } catch {}
+
+      if (texto.startsWith('PROD:')) {
+        const id = texto.replace('PROD:', '').trim();
+        if (productos[id]) return { id, ...productos[id] };
+      }
+
+      const lower = texto.toLowerCase();
+      for (const [id, p] of Object.entries(productos)) {
+        if (String(p?.nombre || '').toLowerCase() === lower) {
+          return { id, ...p };
+        }
+      }
+
+      return null;
+    }
+
+    async function buscarProductoPorContenidoQR(contenido) {
+      if (tieneSesionValida(currentUser)) {
+        return await buscarProductoPrivadoPorContenidoQR(contenido);
+      }
+      return await buscarProductoPublicoPorContenidoQR(contenido);
+    }
+
+  async function procesarScan(texto) {
+  await detenerEscaner();
+  const producto = await buscarProductoPorContenidoQR(texto);
+  if (!producto) {
+    ocultarFichas();
+    setStatus('scanStatus', `No encontré producto para este QR: ${texto}`, 'error');
+    return;
+  }
+  await pintarProducto(producto, 'qr');
+  document.getElementById('scanCard').classList.add('hidden');
+  setStatus('scanStatus', `Producto detectado: ${producto.nombre}`, 'success');
+}
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+
+      const status = document.getElementById('scanStatus');
+      if (status) {
+        if (user) {
+          status.className = 'info';
+          status.textContent = 'Sesión detectada. Ya puedes escanear, vender o reservar.';
+        } else {
+          status.className = 'info';
+          status.textContent = 'Modo consulta: puedes ver nombre, precio de venta y stock.';
+        }
+      }
+
+           const scanId = getQueryParam('scanId');
+      if (scanId) {
+        const producto = await buscarProductoPorContenidoQR(scanId);
+
+        if (!producto) {
+          document.getElementById('scanCard').classList.remove('hidden');
+          setStatus('scanStatus', `Producto no encontrado para scanId: ${scanId}`, 'error');
+          ocultarFichas();
+          return;
+        }
+
+        await pintarProducto(producto, 'url');
+      }
+    });
+
+    window.iniciarEscaner = async () => {
+      document.getElementById('scanCard').classList.remove('hidden');
+
+      if (!window.Html5Qrcode) {
+        setStatus('scanStatus', 'No se cargó la librería de escaneo.', 'error');
+        return;
+      }
+
+      try {
+        scanner = new Html5Qrcode('reader');
+        await scanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: 220 },
+          async (decodedText) => {
+            await procesarScan(decodedText);
+          },
+          () => {}
+        );
+        setStatus('scanStatus', 'Cámara activa. Apunta al QR del producto.', 'info');
+      } catch (e) {
+        setStatus('scanStatus', 'No pude abrir la cámara. Comprueba permisos y HTTPS.', 'error');
+      }
+    };
+
+    window.detenerEscaner = async () => {
+      try {
+        if (scanner) {
+          await scanner.stop();
+          await scanner.clear();
+          scanner = null;
+        }
+      } catch {}
+    };
+
+ window.buscarManual = async () => {
+  const texto = prompt('Escribe ID, URL QR o nombre exacto del producto');
+  if (!texto) return;
+  const producto = await buscarProductoPorContenidoQR(texto);
+  if (!producto) {
+    document.getElementById('scanCard').classList.remove('hidden');
+    setStatus('scanStatus', 'Producto no encontrado.', 'error');
+    ocultarFichas();
+    return;
+  }
+  await detenerEscaner();
+  await pintarProducto(producto, 'manual');
+  document.getElementById('scanCard').classList.add('hidden');
+  setStatus('scanStatus', `Producto encontrado manualmente: ${producto.nombre}`, 'success');
+};
+
+    window.limpiarProducto = () => {
+      productoActual = null;
+      ocultarFichas();
+      const accionStatus = document.getElementById('accionStatus');
+      if (accionStatus) {
+        accionStatus.className = '';
+        accionStatus.textContent = '';
+      }
+    };
+	
+	window.abrirFotoGrande = (src) => {
+  if (!src) return;
+  const modal = document.getElementById('fotoModal');
+  const img = document.getElementById('fotoModalImg');
+  if (!modal || !img) return;
+
+  img.src = src;
+  modal.classList.remove('hidden');
+};
+
+window.cerrarFotoGrande = (event) => {
+  const modal = document.getElementById('fotoModal');
+  const img = document.getElementById('fotoModalImg');
+  if (!modal || !img) return;
+
+  if (event.target.id === 'fotoModal' || event.target === modal) {
+    modal.classList.add('hidden');
+    img.src = '';
+  }
+};
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('fotoModal');
+    const img = document.getElementById('fotoModalImg');
+    if (modal && !modal.classList.contains('hidden')) {
+      modal.classList.add('hidden');
+      if (img) img.src = '';
+    }
+  }
+});
+
+    async function recargarProductoActual() {
+  if (!productoActual?.id) return null;
+  const snap = await get(ref(db, `productos/${productoActual.id}`));
+  if (!snap.exists()) return null;
+  const nuevo = { id: productoActual.id, ...snap.val() };
+  productoActual = nuevo;
+  await pintarProducto(nuevo, 'recarga');
+  return nuevo;
+}
+
+    window.venderRapido = async () => {
+      if (!productoActual || !currentUser) return;
+      const cantidad = Math.max(1, Number(document.getElementById('cantidad').value || 1));
+      const p = await recargarProductoActual();
+      if (!p) return setStatus('accionStatus', 'El producto ya no existe.', 'error');
+
+      const stock = Number(p.stock || 0);
+      if (stock < cantidad) return setStatus('accionStatus', 'Stock insuficiente.', 'error');
+
+      const nuevoStock = stock - cantidad;
+      await update(ref(db, `productos/${p.id}`), {
+        stock: nuevoStock,
+        vendidos: Number(p.vendidos || 0) + cantidad,
+        vBea: Number(p.vBea || 0) + Number(p.bea || 0) * cantidad,
+        vLaura: Number(p.vLaura || 0) + Number(p.laura || 0) * cantidad,
+        ...(nuevoStock === 0 ? { emailAgotadoEnviado: true } : {})
+      });
+
+      await update(ref(db, `productos_publicos/${p.id}`), {
+        nombre: p.nombre || '',
+        laura: Number(p.laura || 0),
+        stock: nuevoStock,
+        imagen: p.imagen || ''
+      });
+
+      await guardarLog(
+        'venta',
+        p.id,
+        p.nombre,
+        cantidad,
+        currentUser.email,
+        `Bea:€${Number(p.bea || 0).toFixed(2)} Laura:€${Number(p.laura || 0).toFixed(2)} | Venta rápida QR`,
+        {
+          precioBea: Number(p.bea || 0),
+          precioLaura: Number(p.laura || 0),
+          totalBea: Number(p.bea || 0) * cantidad,
+          totalLaura: Number(p.laura || 0) * cantidad
+        }
+      );
+
+      await recargarProductoActual();
+      setStatus('accionStatus', `✅ Vendidas ${cantidad} unidades. Stock restante: ${nuevoStock}`, 'success');
+    };
+
+    window.reservarRapido = async () => {
+      if (!productoActual || !currentUser) return;
+      const cantidad = Math.max(1, Number(document.getElementById('cantidad').value || 1));
+      const p = await recargarProductoActual();
+      if (!p) return setStatus('accionStatus', 'El producto ya no existe.', 'error');
+
+      const stock = Number(p.stock || 0);
+      if (stock < cantidad) return setStatus('accionStatus', 'Stock insuficiente.', 'error');
+
+      const nuevoStock = stock - cantidad;
+      const nuevosReservados = Number(p.reservados || 0) + cantidad;
+      await update(ref(db, `productos/${p.id}`), {
+        stock: nuevoStock,
+        reservados: nuevosReservados
+      });
+
+      await update(ref(db, `productos_publicos/${p.id}`), {
+        nombre: p.nombre || '',
+        laura: Number(p.laura || 0),
+        stock: nuevoStock,
+        imagen: p.imagen || ''
+      });
+
+      await guardarLog('reserva', p.id, p.nombre, cantidad, currentUser.email, 'Reserva rápida QR');
+      await recargarProductoActual();
+      setStatus('accionStatus', `✅ Reservadas ${cantidad} unidades. Stock restante: ${nuevoStock}`, 'success');
+    };
+  </script>
+
+  <script src="https://unpkg.com/html5-qrcode" defer></script>
+  <div id="fotoModal" class="foto-modal hidden" onclick="cerrarFotoGrande(event)">
+  <div class="foto-modal-content">
+    <img id="fotoModalImg" src="" alt="Imagen ampliada del producto">
+  </div>
+</div>
+</body>
+</html>
