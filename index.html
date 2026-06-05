@@ -2761,6 +2761,7 @@ console.log('Prueba guardado...')
       ocultoIndex: editId ? !!productos[editId]?.ocultoIndex : false
     };
 
+console.log('Probamos a guardar')
     if (editId) {
       await update(ref(db,'productos/'+editId), data);
       productos[editId] = data;
