@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOGS - Inventario Laura</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f0f2f5;padding:20px;max-width:1500px;margin:0 auto;color:#1f2937}
+    .card{background:#fff;padding:20px;border-radius:12px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+    .login-card{background:#fff3cd;border:2px solid #ffeaa7}
+    .hidden{display:none !important}
+    #status{padding:15px;margin-bottom:20px;border-radius:8px;text-align:center;font-weight:bold;font-size:16px}
+    .admin{background:#d4edda;color:#155724;border:2px solid #c3e6cb}
+    .error{background:#f8d7da;color:#721c24;border:2px solid #f5c6cb}
+
+    .toolbar,.quick-filters,.counters{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .toolbar{margin-bottom:15px}
+    .quick-filters{margin:12px 0}
+    .counters{margin-bottom:15px}
+
+    input,select{padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:14px}
+    #logBuscar{width:250px}
+    #logFechaDesde,#logFechaHasta{width:150px}
+
+    button{padding:9px 14px;border:none;border-radius:8px;background:#007bff;color:#fff;cursor:pointer;font-weight:bold}
+    button:hover{background:#0056b3}
+    .red{background:#dc3545}.red:hover{background:#c82333}
+    .green{background:#28a745}.green:hover{background:#218838}
+    .purple{background:#6f42c1}.purple:hover{background:#5a32a3}
+    .cyan{background:#17a2b8}.cyan:hover{background:#138496}
+    .gray{background:#6c757d}.gray:hover{background:#5a6268}
+    .orange{background:#fd7e14}.orange:hover{background:#dc6d11}
+    .active-filter{outline:3px solid rgba(0,123,255,.2)}
+
+    .totales-logs{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:15px}
+    .total-box{padding:14px;border-radius:10px;font-weight:bold;text-align:center;border:2px solid #d1d5db}
+    .total-bea{background:#d4edda;border-color:#28a745;color:#155724}
+    .total-cant{background:#cce7ff;border-color:#007bff;color:#004085}
+    .total-laura{background:#e8f4fd;border-color:#17a2b8;color:#0c5460}
+    .total-margen{background:#fff3cd;border-color:#ffc107;color:#856404}
+
+    .mini-counter{padding:8px 12px;border-radius:999px;font-weight:bold;font-size:13px;background:#e9ecef}
+    .mini-counter.venta{background:#d4edda;color:#155724}
+    .mini-counter.reserva{background:#dbeafe;color:#1d4ed8}
+    .mini-counter.stock{background:#d1ecf1;color:#0c5460}
+    .mini-counter.precio{background:#e2e3ff;color:#3b3f99}
+    .mini-counter.backup{background:#ede9fe;color:#5b21b6}
+    .mini-counter.reset{background:#dee2e6;color:#212529}
+
+    #logCount{background:#007bff;color:#fff;padding:8px 12px;border-radius:8px;font-weight:bold;display:inline-block;margin-bottom:10px}
+    .tabla-wrap{overflow:auto;border-radius:12px}
+    .log-table{width:100%;border-collapse:collapse;font-size:12px;background:#fff}
+    .log-table th,.log-table td{border:1px solid #ddd;padding:8px 6px;text-align:center}
+    .log-table th{background:#dc3545;color:#fff;font-size:12px;position:sticky;top:0;z-index:3;cursor:pointer;user-select:none;white-space:nowrap}
+    .log-table th:hover{background:#c82333}
+    .log-table tr:nth-child(even){background:#f8f9fa}
+    .log-table tr:hover{background:#eef6ff}
+
+    .log-venta{background:#d4edda !important}
+    .log-reserva{background:#e8f4fd !important}
+    .log-cancelacion{background:#fff3cd !important}
+    .log-eliminacion{background:#f8d7da !important}
+    .log-tipico{background:#e2e3e5 !important}
+
+    .log-tipo{font-weight:bold;font-size:11px;padding:3px 7px;border-radius:999px;display:inline-block;white-space:nowrap}
+    .tipo-venta{background:#28a745;color:#fff}
+    .tipo-reserva{background:#17a2b8;color:#fff}
+    .tipo-cancel-reserva{background:#ffc107;color:#000}
+    .tipo-elim-venta{background:#dc3545;color:#fff}
+    .tipo-backup{background:#6f42c1;color:#fff}
+    .tipo-stock{background:#20c997;color:#fff}
+    .tipo-precio{background:#007bff;color:#fff}
+    .tipo-reset{background:#343a40;color:#fff}
+
+    .money-bea{color:#198754;font-weight:bold}
+    .money-laura{color:#0d6efd;font-weight:bold}
+    .money-margin{color:#6f42c1;font-weight:bold}
+    .empty-state{padding:25px;text-align:center;color:#6b7280;font-weight:bold}
+    .small-note{font-size:12px;color:#6b7280;font-weight:bold}
+    .product-link-btn{padding:5px 8px;font-size:11px;border-radius:6px;background:#17a2b8;color:#fff;border:none;cursor:pointer;font-weight:bold}
+    .product-link-btn:hover{background:#138496}
+
+    @media (max-width:1100px){
+      .totales-logs{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:800px){
+      body{padding:10px}
+      .totales-logs{grid-template-columns:1fr}
+      #logBuscar,#logFechaDesde,#logFechaHasta{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="card login-card" id="loginDiv">
+    <h3>Iniciar Sesión</h3>
+    <input id="userEmail" type="email" placeholder="Email" list="userList"><br>
+    <input id="userPass" type="password" placeholder="Contraseña"><br><br>
+    <datalist id="userList">
+      <option value="nilose2014@gmail.com">ADMIN</option>
+    </datalist>
+    <button onclick="login()">Entrar</button>
+    <button class="red" onclick="resetLogin()">Limpiar</button>
+  </div>
+
+  <div id="mainApp" class="hidden">
+    <div id="status">Cargando...</div>
+
+    <div class="card">
+      <h2>📋 HISTORIAL COMPLETO DE MOVIMIENTOS</h2>
+
+      <div class="toolbar">
+        <input id="logBuscar" placeholder="Buscar producto/usuario/detalles..." oninput="aplicarFiltros()">
+        <input type="date" id="logFechaDesde" onchange="aplicarFiltros()">
+        <input type="date" id="logFechaHasta" onchange="aplicarFiltros()">
+
+        <select id="logTipo" onchange="aplicarFiltros()">
+          <option value="todos">Todos los tipos</option>
+		  <option value="usuario-conectado">Usuarios conectados</option>
+<option value="consulta-producto">Consultas de producto</option>
+          <option value="venta">Solo VENTAS</option>
+          <option value="reserva">Solo RESERVAS</option>
+          <option value="cancelacion-reserva">Solo CANCEL. RESERVA</option>
+          <option value="eliminacion-venta">Solo ELIMINACIÓN VENTA</option>
+          <option value="backup-creado">Backups creados</option>
+          <option value="backup-restaurado">Backups restaurados</option>
+          <option value="stock-anadido">Stock añadido</option>
+          <option value="stock-modificado">Stock modificado</option>
+          <option value="proximo-modificado">Próximo modificado</option>
+          <option value="precio-laura">Precio Laura</option>
+          <option value="precio-laura-global">Precio Laura GLOBAL</option>
+          <option value="producto-creado">Producto creado</option>
+          <option value="producto-editado">Producto editado</option>
+          <option value="producto-borrado">Producto borrado</option>
+          <option value="reset-completo">Reset COMPLETO</option>
+        </select>
+
+        <button onclick="recargarRangoRapido(7)">7 días</button>
+        <button onclick="recargarRangoRapido(30)">30 días</button>
+        <button class="gray" onclick="limpiarFiltros()">Limpiar filtros</button>
+        <button class="green" onclick="exportarCSV()">⬇️ CSV</button>
+        <button class="purple" onclick="irDebug()">🔧 DEBUG</button>
+        <button class="red" onclick="limpiarTodosLogs()">LIMPIAR TODOS LOGS</button>
+        <div style="flex:1"></div>
+        <button class="red" onclick="logout()">Cerrar Sesión</button>
+      </div>
+
+      <div class="quick-filters">
+  <button id="quick-all" class="gray active-filter" onclick="setQuickFilter('todos', this)">Todos</button>
+  <button class="gray" onclick="setQuickFilter('usuario-conectado', this)">Conexiones</button>
+  <button class="cyan" onclick="setQuickFilter('consulta-producto', this)">Consultas</button>
+  <button class="green" onclick="setQuickFilter('venta', this)">Ventas</button>
+  <button class="cyan" onclick="setQuickFilter('reserva', this)">Reservas</button>
+  <button class="orange" onclick="setQuickFilter('stock-group', this)">Stock</button>
+  <button class="purple" onclick="setQuickFilter('precio-group', this)">Precios</button>
+  <button class="purple" onclick="setQuickFilter('backup-group', this)">Backups</button>
+  <button class="gray" onclick="setQuickFilter('reset-completo', this)">Resets</button>
+</div>
+
+      <div id="alertasInteligentes" class="card" style="margin-bottom:15px;background:#fff7ed;border:2px solid #fdba74;padding:14px"></div>
+
+      <div class="totales-logs">
+        <div class="total-box total-bea">
+          <div>💰 TOTAL BEA INDEX</div>
+          <div id="totalBeaIndex" style="font-size:24px">0.00 €</div>
+        </div>
+        <div class="total-box total-cant">
+          <div>📦 CANTIDAD FILTRADA</div>
+          <div id="totalCantidadLogs" style="font-size:24px">0</div>
+        </div>
+        <div class="total-box total-laura">
+          <div>💰 LAURA FILTRADO</div>
+          <div id="totalLauraLogs" style="font-size:24px">0.00 €</div>
+        </div>
+        <div class="total-box total-margen">
+          <div>📊 MARGEN FILTRADO</div>
+          <div id="totalMargenLogs" style="font-size:24px">0.00 €</div>
+        </div>
+      </div>
+
+      <div class="counters">
+        <div class="mini-counter venta">Ventas: <span id="countVentas">0</span></div>
+        <div class="mini-counter reserva">Reservas: <span id="countReservas">0</span></div>
+        <div class="mini-counter stock">Stock: <span id="countStock">0</span></div>
+        <div class="mini-counter precio">Precios: <span id="countPrecios">0</span></div>
+        <div class="mini-counter backup">Backups: <span id="countBackups">0</span></div>
+        <div class="mini-counter reset">Resets: <span id="countResets">0</span></div>
+      </div>
+
+      <div id="logCount">0 movimientos encontrados</div>
+      <div class="small-note">Pulsa en las cabeceras para ordenar. En ventas se calcula Bea, Laura y margen si existen en el log.</div>
+
+      <div class="tabla-wrap">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th onclick="ordenarPor('fecha')">Fecha ⬍</th>
+              <th onclick="ordenarPor('tipo')">Tipo ⬍</th>
+              <th onclick="ordenarPor('producto')">Producto ⬍</th>
+              <th onclick="ordenarPor('cantidad')">Cant. ⬍</th>
+              <th onclick="ordenarPor('usuario')">Usuario ⬍</th>
+              <th onclick="ordenarPor('bea')">Bea ⬍</th>
+              <th onclick="ordenarPor('laura')">Laura ⬍</th>
+              <th onclick="ordenarPor('margen')">Margen ⬍</th>
+              <th onclick="ordenarPor('ip')">IP ⬍</th>
+              <th onclick="ordenarPor('dispositivo')">Dispositivo ⬍</th>
+              <th>Acción</th>
+              <th>Detalles</th>
+            </tr>
+          </thead>
+          <tbody id="tablaLogs"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getDatabase, ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBYKEUjEi8TDwJ79l1QU67BNAPn7QOsKV4",
+      authDomain: "inventario-laura.firebaseapp.com",
+      databaseURL: "https://inventario-laura-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "inventario-laura",
+      storageBucket: "inventario-laura.firebasestorage.app",
+      messagingSenderId: "778807935660",
+      appId: "1:778807935660:web:947e223465f9347b17d509"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const logsRef = ref(db, 'logs');
+    const productosRef = ref(db, 'productos');
+
+    let todosLogs = [];
+    let todosProductos = {};
+    let logsFiltradosActuales = [];
+    let ordenActual = { campo: 'fecha', dir: 'desc' };
+    let quickFilterActual = 'todos';
+
+function tipoClase(tipo){
+  switch(tipo){
+    case 'venta': return ['tipo-venta','log-venta'];
+    case 'reserva': return ['tipo-reserva','log-reserva'];
+    case 'cancelacion-reserva': return ['tipo-cancel-reserva','log-cancelacion'];
+    case 'eliminacion-venta': return ['tipo-elim-venta','log-eliminacion'];
+    case 'usuario-conectado': return ['tipo-backup','log-tipico'];
+    case 'consulta-producto': return ['tipo-stock','log-tipico'];
+    case 'backup-creado':
+    case 'backup-restaurado': return ['tipo-backup','log-tipico'];
+    case 'stock-anadido':
+    case 'stock-modificado':
+    case 'proximo-modificado': return ['tipo-stock','log-tipico'];
+    case 'precio-laura':
+    case 'precio-laura-global':
+    case 'producto-creado':
+    case 'producto-editado':
+    case 'producto-borrado': return ['tipo-precio','log-tipico'];
+    case 'reset-completo': return ['tipo-reset','log-tipico'];
+    default: return ['',''];
+  }
+}
+
+    function safeLower(v){ return String(v || '').toLowerCase().trim(); }
+
+    function extraerImportes(log){
+      const detalles = String(log?.detalles || '');
+      const beaDirect = Number(log?.precioBea ?? log?.totalBea ?? 0);
+      const lauraDirect = Number(log?.precioLaura ?? log?.totalLaura ?? 0);
+
+      const beaMatch = detalles.match(/Bea:€([0-9]+(?:\.[0-9]+)?)/);
+      const lauraMatch = detalles.match(/Laura:€([0-9]+(?:\.[0-9]+)?)/);
+
+      const cantidad = Number(log?.cantidad || 0);
+      const beaUnit = beaDirect || (beaMatch ? Number(beaMatch[1]) : 0);
+      const lauraUnit = lauraDirect || (lauraMatch ? Number(lauraMatch[1]) : 0);
+      const bea = log?.totalBea != null ? Number(log.totalBea) : beaUnit * cantidad;
+      const laura = log?.totalLaura != null ? Number(log.totalLaura) : lauraUnit * cantidad;
+      const margen = laura - bea;
+      return { bea, laura, margen };
+    }
+
+    function resumirDispositivo(userAgent){
+      const ua = String(userAgent || '');
+      const navegador = /Edg/i.test(ua) ? 'Edge' : /OPR|Opera/i.test(ua) ? 'Opera' : /Chrome/i.test(ua) ? 'Chrome' : /Firefox/i.test(ua) ? 'Firefox' : /Safari/i.test(ua) ? 'Safari' : 'Navegador';
+      const sistema = /Windows/i.test(ua) ? 'Windows' : /Android/i.test(ua) ? 'Android' : /iPhone|iPad|iOS/i.test(ua) ? 'iPhone/iPad' : /Mac OS|Macintosh/i.test(ua) ? 'Mac' : /Linux/i.test(ua) ? 'Linux' : 'SO';
+      return `${navegador} / ${sistema}`;
+    }
+
+    function detectarAlertas(logs){
+      let correcciones = 0;
+      let cambiosPrecio = 0;
+      let ventasGrandes = 0;
+      const ips = new Set();
+
+      logs.forEach(log => {
+        if (log.tipo === 'eliminacion-venta') correcciones++;
+        if (log.tipo === 'precio-laura' || log.tipo === 'precio-laura-global') cambiosPrecio++;
+        if (log.tipo === 'venta' && Number(log.cantidad || 0) >= 10) ventasGrandes++;
+        if (log.ip && log.ip !== 'IP desconocida') ips.add(log.ip);
+      });
+
+      return {
+        correcciones,
+        cambiosPrecio,
+        ventasGrandes,
+        ipsDistintas: ips.size
+      };
+    }
+
+    function actualizarAlertas(logs){
+      const alertas = detectarAlertas(logs);
+      document.getElementById('alertasInteligentes').innerHTML = `
+        <div style="font-weight:bold;font-size:16px;margin-bottom:8px">🛡️ Alertas inteligentes</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <span class="mini-counter reset">Correcciones de venta: ${alertas.correcciones}</span>
+          <span class="mini-counter backup">IPs distintas: ${alertas.ipsDistintas}</span>
+          <span class="mini-counter precio">Cambios de precio: ${alertas.cambiosPrecio}</span>
+          <span class="mini-counter venta">Ventas grandes (10+): ${alertas.ventasGrandes}</span>
+        </div>
+      `;
+    }
+
+    function actualizarTotalBea(){
+      let totalBea = 0;
+      Object.values(todosProductos || {}).forEach(p => {
+        totalBea += Number(p?.bea || 0);
+      });
+      document.getElementById('totalBeaIndex').textContent = totalBea.toFixed(2) + ' €';
+    }
+
+    function actualizarContadores(logs){
+      const totalCantidad = logs.reduce((acc, log) => acc + Number(log?.cantidad || 0), 0);
+      const totalLaura = logs.reduce((acc, log) => acc + Number(log?.lauraCalc || 0), 0);
+      const totalMargen = logs.reduce((acc, log) => acc + Number(log?.margenCalc || 0), 0);
+
+      const ventas = logs.filter(l => l.tipo === 'venta' || l.tipo === 'eliminacion-venta').length;
+      const reservas = logs.filter(l => l.tipo === 'reserva' || l.tipo === 'cancelacion-reserva').length;
+      const stock = logs.filter(l => ['stock-anadido','stock-modificado','proximo-modificado'].includes(l.tipo)).length;
+      const precios = logs.filter(l => ['precio-laura','precio-laura-global','producto-creado','producto-editado','producto-borrado'].includes(l.tipo)).length;
+      const backups = logs.filter(l => ['backup-creado','backup-restaurado'].includes(l.tipo)).length;
+      const resets = logs.filter(l => l.tipo === 'reset-completo').length;
+
+      document.getElementById('totalCantidadLogs').textContent = totalCantidad.toLocaleString('es-ES');
+      document.getElementById('totalLauraLogs').textContent = totalLaura.toFixed(2) + ' €';
+      document.getElementById('totalMargenLogs').textContent = totalMargen.toFixed(2) + ' €';
+      document.getElementById('countVentas').textContent = ventas;
+      document.getElementById('countReservas').textContent = reservas;
+      document.getElementById('countStock').textContent = stock;
+      document.getElementById('countPrecios').textContent = precios;
+      document.getElementById('countBackups').textContent = backups;
+      document.getElementById('countResets').textContent = resets;
+    }
+
+    function coincideQuickFilter(log){
+      if (quickFilterActual === 'todos') return true;
+      if (quickFilterActual === 'stock-group') return ['stock-anadido','stock-modificado','proximo-modificado'].includes(log.tipo);
+      if (quickFilterActual === 'precio-group') return ['precio-laura','precio-laura-global','producto-creado','producto-editado','producto-borrado'].includes(log.tipo);
+      if (quickFilterActual === 'backup-group') return ['backup-creado','backup-restaurado'].includes(log.tipo);
+      return log.tipo === quickFilterActual;
+    }
+
+    function ordenarLogs(logs){
+      const arr = [...logs];
+      arr.sort((a,b) => {
+        let va, vb;
+        switch(ordenActual.campo){
+          case 'fecha': va = Number(a.timestamp || 0); vb = Number(b.timestamp || 0); break;
+          case 'tipo': va = safeLower(a.tipo); vb = safeLower(b.tipo); break;
+          case 'producto': va = safeLower(a.productoNombre); vb = safeLower(b.productoNombre); break;
+          case 'cantidad': va = Number(a.cantidad || 0); vb = Number(b.cantidad || 0); break;
+          case 'usuario': va = safeLower(a.usuario); vb = safeLower(b.usuario); break;
+          case 'bea': va = Number(a.beaCalc || 0); vb = Number(b.beaCalc || 0); break;
+          case 'laura': va = Number(a.lauraCalc || 0); vb = Number(b.lauraCalc || 0); break;
+          case 'margen': va = Number(a.margenCalc || 0); vb = Number(b.margenCalc || 0); break;
+          case 'ip': va = safeLower(a.ip); vb = safeLower(b.ip); break;
+          case 'dispositivo': va = safeLower(a.dispositivoResumen); vb = safeLower(b.dispositivoResumen); break;
+          default: va = Number(a.timestamp || 0); vb = Number(b.timestamp || 0);
+        }
+
+        if (typeof va === 'string') {
+          return ordenActual.dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+        }
+        return ordenActual.dir === 'asc' ? va - vb : vb - va;
+      });
+      return arr;
+    }
+
+    function renderLogs(logs){
+      const tabla = document.getElementById('tablaLogs');
+      const count = document.getElementById('logCount');
+      actualizarContadores(logs);
+      actualizarAlertas(logs);
+
+      if (!logs.length){
+        tabla.innerHTML = '<tr><td colspan="12" class="empty-state">No hay logs con esos filtros</td></tr>';
+        count.textContent = '0 movimientos encontrados';
+        return;
+      }
+
+      let html = '';
+      for (const log of logs){
+        const [claseTipo, claseFila] = tipoClase(log.tipo || '');
+        const productoUrl = log.productoId ? `index.html?editId=${encodeURIComponent(log.productoId)}` : '';
+
+        html += `
+          <tr class="${claseFila}">
+            <td>${log.fecha || ''}</td>
+            <td><span class="log-tipo ${claseTipo}">${String(log.tipo || '').replace(/-/g,' ').toUpperCase()}</span></td>
+            <td style="text-align:left">${log.productoNombre || ''}</td>
+            <td>${Number(log.cantidad || 0)}</td>
+            <td>${log.usuario || ''}</td>
+            <td class="money-bea">${log.beaCalc ? log.beaCalc.toFixed(2) + ' €' : '-'}</td>
+            <td class="money-laura">${log.lauraCalc ? log.lauraCalc.toFixed(2) + ' €' : '-'}</td>
+            <td class="money-margin">${log.lauraCalc || log.beaCalc ? log.margenCalc.toFixed(2) + ' €' : '-'}</td>
+            <td>${log.ip || '-'}</td>
+            <td>${log.dispositivoResumen || '-'}</td>
+            <td>${productoUrl ? `<button class="product-link-btn" onclick="verProducto('${productoUrl}')">🔍</button>` : '-'}</td>
+            <td style="text-align:left;font-size:11px">${log.detalles || ''}</td>
+          </tr>
+        `;
+      }
+
+      tabla.innerHTML = html;
+      count.textContent = `${logs.length} movimientos encontrados`;
+    }
+
+    function refrescarQuickButtons(btnActivo){
+      document.querySelectorAll('.quick-filters button').forEach(btn => btn.classList.remove('active-filter'));
+      if (btnActivo) btnActivo.classList.add('active-filter');
+    }
+
+    window.setQuickFilter = (tipo, btn) => {
+      quickFilterActual = tipo;
+      refrescarQuickButtons(btn);
+if (['usuario-conectado','consulta-producto','venta','reserva','cancelacion-reserva','eliminacion-venta','backup-creado','backup-restaurado','stock-anadido','stock-modificado','proximo-modificado','precio-laura','precio-laura-global','producto-creado','producto-editado','producto-borrado','reset-completo','todos'].includes(tipo)) {
+        document.getElementById('logTipo').value = tipo === 'todos' ? 'todos' : tipo;
+      } else {
+        document.getElementById('logTipo').value = 'todos';
+      }
+      aplicarFiltros();
+    };
+
+    window.ordenarPor = (campo) => {
+      if (ordenActual.campo === campo) {
+        ordenActual.dir = ordenActual.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        ordenActual.campo = campo;
+        ordenActual.dir = campo === 'fecha' ? 'desc' : 'asc';
+      }
+      aplicarFiltros();
+    };
+
+    window.aplicarFiltros = () => {
+      const texto = safeLower(document.getElementById('logBuscar').value);
+      const tipo = document.getElementById('logTipo').value;
+      const desde = document.getElementById('logFechaDesde').value;
+      const hasta = document.getElementById('logFechaHasta').value;
+
+      let filtrados = todosLogs.filter(log => {
+        const fecha = String(log.fechaYmd || '');
+        const coincideFecha = (!desde || fecha >= desde) && (!hasta || fecha <= hasta);
+        const coincideTexto =
+          safeLower(log.productoNombre).includes(texto) ||
+          safeLower(log.usuario).includes(texto) ||
+          safeLower(log.detalles).includes(texto) ||
+          safeLower(log.tipo).includes(texto) ||
+          safeLower(log.ip).includes(texto) ||
+          safeLower(log.dispositivoResumen).includes(texto);
+        const coincideTipo = tipo === 'todos' || log.tipo === tipo;
+        return coincideFecha && coincideTexto && coincideTipo && coincideQuickFilter(log);
+      });
+
+      filtrados = ordenarLogs(filtrados);
+      logsFiltradosActuales = filtrados;
+      renderLogs(filtrados);
+    };
+
+    window.recargarRangoRapido = (dias) => {
+      const hoy = new Date();
+      const desde = new Date(Date.now() - (dias - 1) * 24 * 60 * 60 * 1000);
+      document.getElementById('logFechaDesde').value = desde.toISOString().split('T')[0];
+      document.getElementById('logFechaHasta').value = hoy.toISOString().split('T')[0];
+      aplicarFiltros();
+    };
+
+    window.limpiarFiltros = () => {
+      document.getElementById('logBuscar').value = '';
+      document.getElementById('logTipo').value = 'todos';
+      quickFilterActual = 'todos';
+      ordenActual = { campo: 'fecha', dir: 'desc' };
+      recargarRangoRapido(7);
+      const btn = document.getElementById('quick-all');
+      refrescarQuickButtons(btn);
+    };
+
+    window.verProducto = (url) => {
+      window.open(url, '_blank');
+    };
+
+    window.exportarCSV = () => {
+      const filas = [["Fecha","Tipo","Producto","Cantidad","Usuario","Bea","Laura","Margen","IP","Dispositivo","Detalles"]];
+      logsFiltradosActuales.forEach(log => {
+        filas.push([
+          log.fecha || '',
+          log.tipo || '',
+          log.productoNombre || '',
+          Number(log.cantidad || 0),
+          log.usuario || '',
+          log.beaCalc ? log.beaCalc.toFixed(2) : '',
+          log.lauraCalc ? log.lauraCalc.toFixed(2) : '',
+          log.lauraCalc || log.beaCalc ? log.margenCalc.toFixed(2) : '',
+          log.ip || '',
+          log.dispositivoResumen || '',
+          log.detalles || ''
+        ]);
+      });
+
+      const csv = filas.map(f => f.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'logs-inventario-laura.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    };
+
+    window.login = () => {
+      const email = document.getElementById('userEmail').value.trim();
+      const pass = document.getElementById('userPass').value;
+      if (!email || !pass) return alert('Email y contraseña requeridos');
+      signInWithEmailAndPassword(auth, email, pass).catch(e => alert('Error: ' + e.message));
+    };
+
+    window.logout = () => {
+      signOut(auth).catch(e => alert('Error: ' + e.message));
+    };
+
+    window.resetLogin = () => {
+      document.getElementById('userEmail').value = '';
+      document.getElementById('userPass').value = '';
+    };
+
+    window.irDebug = () => {
+      window.open('https://nilose2014.github.io/inventario-laura/debug.html', '_blank');
+    };
+
+    window.limpiarTodosLogs = async () => {
+      if (!confirm('⚠️ ¿BORRAR TODOS los logs permanentemente?\n\nEsta acción NO se puede deshacer.')) return;
+      try {
+        await remove(logsRef);
+        todosLogs = [];
+        logsFiltradosActuales = [];
+        renderLogs([]);
+        alert('✅ TODOS los logs han sido eliminados');
+      } catch (error) {
+        alert('❌ Error al limpiar logs: ' + error.message);
+      }
+    };
+
+    onValue(productosRef, (snap) => {
+      todosProductos = snap.val() || {};
+      actualizarTotalBea();
+    });
+
+    onValue(logsRef, (snap) => {
+      const nuevosLogs = [];
+      snap.forEach(child => {
+        const raw = child.val() || {};
+        const timestamp = Number(raw.timestamp || 0);
+        if (!timestamp) return;
+        const fechaObj = new Date(timestamp);
+        const fechaYmd = fechaObj.toISOString().split('T')[0];
+        const importes = extraerImportes(raw);
+
+        nuevosLogs.push({
+          key: child.key,
+          ...raw,
+          timestamp,
+          fechaYmd,
+          fecha: raw.fecha || fechaObj.toLocaleString('es-ES'),
+          productoNombre: raw.productoNombre || '',
+          usuario: raw.usuario || '',
+          detalles: raw.detalles || '',
+          cantidad: Number(raw.cantidad || 0),
+          tipo: raw.tipo || '',
+          beaCalc: Number(importes.bea || 0),
+          lauraCalc: Number(importes.laura || 0),
+          margenCalc: Number(importes.margen || 0),
+          ip: raw.ip || 'IP desconocida',
+          dispositivo: raw.dispositivo || '',
+          dispositivoResumen: resumirDispositivo(raw.dispositivo || '')
+        });
+      });
+
+      todosLogs = nuevosLogs;
+      aplicarFiltros();
+    }, (error) => {
+      const status = document.getElementById('status');
+      status.className = 'error';
+      status.textContent = '❌ Error cargando logs: ' + error.message;
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      const loginDiv = document.getElementById('loginDiv');
+      const mainApp = document.getElementById('mainApp');
+      const status = document.getElementById('status');
+
+      if (user && user.email === 'nilose2014@gmail.com') {
+        loginDiv.classList.add('hidden');
+        mainApp.classList.remove('hidden');
+        status.className = 'admin';
+        status.innerHTML = `<strong>ADMIN</strong> ${user.email}<br>Logs cargados ✅`;
+      } else {
+        mainApp.classList.add('hidden');
+        loginDiv.classList.remove('hidden');
+      }
+    });
+
+    window.onload = () => {
+      recargarRangoRapido(7);
+      refrescarQuickButtons(document.getElementById('quick-all'));
+    };
+  </script>
+</body>
+</html>
