@@ -44,6 +44,7 @@
 
     <datalist id="userList">
       <option value="yoelmejias@outlook.es">ADMIN</option>
+	  <option value="irelandmorcillo@gmail.com">ADMIN</option>
       <option value="djsubixj@gmail.com">Usuario</option>
       <option value="xiomaralamasmala@gmail.com">Usuario</option>
     </datalist>
@@ -1834,7 +1835,7 @@ window.eliminarUnaVenta = async (id) => {
 };
 
 window.hacerBackup = async () => {
-  if (currentUser.email !== 'yoelmejias@outlook.es') return alert('✖ Solo yoelmejias@outlook.es puede hacer backup');
+  if (currentUser.email !== 'yoelmejias@outlook.es' || currentUser.email !== 'irelandmorcillo@gmail.com') return alert('✖ Solo yoelmejias@outlook.es e ire puede hacer backup');
   try {
     const backupData = {
       productos,
@@ -1870,7 +1871,7 @@ window.hacerBackup = async () => {
 };
 
 window.restaurarBackup = async (event) => {
-  if (currentUser.email !== 'yoelmejias@outlook.es') return showToast('✖ Solo yoelmejias@outlook.es puede restaurar', 'error');
+  if (currentUser.email !== 'yoelmejias@outlook.es' || currentUser.email !== 'irelandmorcillo@gmail.com') return showToast('✖ Solo yoelmejias@outlook.es puede restaurar', 'error');
   const file = event.target.files[0];
   if (!file) return;
 
@@ -1903,7 +1904,7 @@ window.restaurarBackup = async (event) => {
 };
 
 window.cargarBackupFirebase = () => {
-  if (currentUser.email !== 'yoelmejias@outlook.es') return;
+  if (currentUser.email !== 'yoelmejias@outlook.es' || currentUser.email !== 'irelandmorcillo@gmail.com') return;
   onValue(backupRef, (snap) => {
     if (snap.exists()) {
       ultimoBackup = snap.val();
@@ -2030,7 +2031,7 @@ document.getElementById('userEmail').addEventListener('keydown', (e) => {
 });
 
 function checkUserRole() {
-  const esAdmin = currentUser && currentUser.email === 'yoelmejias@outlook.es';
+  const esAdmin = currentUser && (currentUser.email === 'yoelmejias@outlook.es' || currentUser.email !== 'irelandmorcillo@gmail.com');
   const esUsuarioRegistrado = currentUser && [
     'djsubixj@gmail.com',
     'xiomaralamasmala@gmail.com'
