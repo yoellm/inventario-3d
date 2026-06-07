@@ -130,7 +130,7 @@ h3{
   font-weight:900;
 }
 .kpi.green{background:linear-gradient(180deg,#ecfdf5,#d1fae5);border-color:#a7f3d0}
-.kpi.blue{background:linear-gradient(180deg,#eff6ff,#dbeafe);border-color:#bfdbfe}
+.kpi.blue{background:linear-gradient(180deg,#eff6ff,#dyoelfe);border-color:#bfdbfe}
 .kpi.yellow{background:linear-gradient(180deg,#fffbeb,#fef3c7);border-color:#fde68a}
 .kpi.red{background:linear-gradient(180deg,#fef2f2,#fee2e2);border-color:#fecaca}
 .kpi.cyan{background:linear-gradient(180deg,#ecfeff,#cffafe);border-color:#a5f3fc}
@@ -211,7 +211,7 @@ h3{
   font-weight:900;
 }
 .destacado-kpi.green{background:linear-gradient(180deg,#ecfdf5,#d1fae5);border-color:#a7f3d0}
-.destacado-kpi.blue{background:linear-gradient(180deg,#eff6ff,#dbeafe);border-color:#bfdbfe}
+.destacado-kpi.blue{background:linear-gradient(180deg,#eff6ff,#dyoelfe);border-color:#bfdbfe}
 .destacado-kpi.yellow{background:linear-gradient(180deg,#fffbeb,#fef3c7);border-color:#fde68a}
 .destacado-kpi.cyan{background:linear-gradient(180deg,#ecfeff,#cffafe);border-color:#a5f3fc}
 .destacado-acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
@@ -308,7 +308,7 @@ tr:hover{background:#eef6ff}
 }
 .badge.red{background:#fee2e2;color:#991b1b}
 .badge.yellow{background:#fef3c7;color:#92400e}
-.badge.blue{background:#dbeafe;color:#1d4ed8}
+.badge.blue{background:#dyoelfe;color:#1d4ed8}
 .badge.green{background:#dcfce7;color:#166534}
 
 .section-grid{
@@ -488,8 +488,8 @@ canvas{width:100% !important;max-height:390px !important}
         <option value="vendidos-asc">Vendidos ↑</option>
         <option value="laura-desc">Laura € ↓</option>
         <option value="laura-asc">Laura € ↑</option>
-        <option value="bea-desc">Bea € ↓</option>
-        <option value="bea-asc">Bea € ↑</option>
+        <option value="yoel-desc">yoel € ↓</option>
+        <option value="yoel-asc">yoel € ↑</option>
         <option value="stock-asc">Stock ↑</option>
         <option value="stock-desc">Stock ↓</option>
         <option value="reservados-desc">Reservados ↓</option>
@@ -536,9 +536,9 @@ canvas{width:100% !important;max-height:390px !important}
 </div>
 
 <div class="grid-top">
-  <div class="kpi green"><div class="label">💰 Total Bea</div><div class="value" id="kpiBea">€0.00</div></div>
+  <div class="kpi green"><div class="label">💰 Total yoel</div><div class="value" id="kpiyoel">€0.00</div></div>
   <div class="kpi blue"><div class="label">💰 Total Laura</div><div class="value" id="kpiLaura">€0.00</div></div>
-  <div class="kpi yellow"><div class="label">📊 Diferencia Laura - Bea</div><div class="value" id="kpiDiferencia">€0.00</div></div>
+  <div class="kpi yellow"><div class="label">📊 Diferencia Laura - yoel</div><div class="value" id="kpiDiferencia">€0.00</div></div>
   <div class="kpi cyan"><div class="label">📦 Unidades vendidas</div><div class="value" id="kpiVendidos">0</div></div>
   <div class="kpi purple"><div class="label">📦 Reservados</div><div class="value" id="kpiReservados">0</div></div>
   <div class="kpi red"><div class="label">⛔ Productos agotados</div><div class="value" id="kpiAgotados">0</div></div>
@@ -570,7 +570,7 @@ canvas{width:100% !important;max-height:390px !important}
               <th>Próximo</th>
               <th>Reservados</th>
               <th>Vendidos</th>
-              <th>Bea €</th>
+              <th>yoel €</th>
               <th>Laura €</th>
               <th>% ventas</th>
               <th>Estado</th>
@@ -611,7 +611,7 @@ canvas{width:100% !important;max-height:390px !important}
     </div>
 
     <div class="card">
-      <h2>📈 Beneficio por mes (Laura - Bea)</h2>
+      <h2>📈 Beneficio por mes (Laura - yoel)</h2>
       <div class="chart-wrap">
         <canvas id="chartBeneficioMeses"></canvas>
       </div>
@@ -653,7 +653,7 @@ canvas{width:100% !important;max-height:390px !important}
       <div class="tabla-container">
         <table class="mini-table">
           <thead>
-            <tr><th>Periodo</th><th>Ventas</th><th>Ingresos Bea</th><th>Ingresos Laura</th><th>Diferencia (L-B)</th></tr>
+            <tr><th>Periodo</th><th>Ventas</th><th>Ingresos yoel</th><th>Ingresos Laura</th><th>Diferencia (L-B)</th></tr>
           </thead>
           <tbody id="tablaPeriodos"></tbody>
         </table>
@@ -665,7 +665,7 @@ canvas{width:100% !important;max-height:390px !important}
       <div class="tabla-container">
         <table class="mini-table">
           <thead>
-            <tr><th>#</th><th>Mes</th><th>Laura</th><th>Bea</th><th>Beneficio</th><th>Ventas</th></tr>
+            <tr><th>#</th><th>Mes</th><th>Laura</th><th>yoel</th><th>Beneficio</th><th>Ventas</th></tr>
           </thead>
           <tbody id="tablaRankingMeses"></tbody>
         </table>
@@ -818,7 +818,7 @@ function construirFilas(){
     const stock = Number(p.stock || 0);
     const proximo = Number(p.proximo || 0);
     const reservados = Number(p.reservados || 0);
-    const hist = historialGlobal.porProducto[id] || { vendidos: 0, beaTotal: 0, lauraTotal: 0 };
+    const hist = historialGlobal.porProducto[id] || { vendidos: 0, yoelTotal: 0, lauraTotal: 0 };
 
     return {
       id,
@@ -828,7 +828,7 @@ function construirFilas(){
       proximo,
       reservados,
       vendidos: Math.max(0, Number(hist.vendidos || 0)),
-      beaTotal: Math.max(0, Number(hist.beaTotal || 0)),
+      yoelTotal: Math.max(0, Number(hist.yoelTotal || 0)),
       lauraTotal: Math.max(0, Number(hist.lauraTotal || 0)),
       porcentaje: 0
     };
@@ -857,17 +857,17 @@ function calcularHistorialDesdeLogs(desde = '', hasta = ''){
       porProducto[productoId] = {
         nombre: productoNombre,
         vendidos: 0,
-        beaTotal: 0,
+        yoelTotal: 0,
         lauraTotal: 0
       };
     }
 
-    const beaMatch = detalles.match(/Bea:?€?\s*([0-9]+(?:\.[0-9]+)?)/i);
+    const yoelMatch = detalles.match(/yoel:?€?\s*([0-9]+(?:\.[0-9]+)?)/i);
     const lauraMatch = detalles.match(/Laura:?€?\s*([0-9]+(?:\.[0-9]+)?)/i);
 
-    if (beaMatch || lauraMatch) {
+    if (yoelMatch || lauraMatch) {
       lastKnownPrices[productoId] = {
-        bea: beaMatch ? Number(beaMatch[1]) : Number(lastKnownPrices[productoId]?.bea || 0),
+        yoel: yoelMatch ? Number(yoelMatch[1]) : Number(lastKnownPrices[productoId]?.yoel || 0),
         laura: lauraMatch ? Number(lauraMatch[1]) : Number(lastKnownPrices[productoId]?.laura || 0)
       };
     }
@@ -876,18 +876,18 @@ function calcularHistorialDesdeLogs(desde = '', hasta = ''){
     if (!dentroRango) continue;
 
     const productoActual = productos[productoId] || {};
-    const beaUnit = Number(lastKnownPrices[productoId]?.bea || productoActual.bea || 0);
+    const yoelUnit = Number(lastKnownPrices[productoId]?.yoel || productoActual.yoel || 0);
     const lauraUnit = Number(lastKnownPrices[productoId]?.laura || productoActual.laura || 0);
 
-    let totalBea = Number(log.totalBea);
+    let totalyoel = Number(log.totalyoel);
     let totalLaura = Number(log.totalLaura);
 
-    if (!Number.isFinite(totalBea)) totalBea = beaUnit * cantidad;
+    if (!Number.isFinite(totalyoel)) totalyoel = yoelUnit * cantidad;
     if (!Number.isFinite(totalLaura)) totalLaura = lauraUnit * cantidad;
 
     if (log.tipo === 'venta' || log.tipo === 'venta-desde-reserva') {
       porProducto[productoId].vendidos += cantidad;
-      porProducto[productoId].beaTotal += totalBea;
+      porProducto[productoId].yoelTotal += totalyoel;
       porProducto[productoId].lauraTotal += totalLaura;
 
       ventasPorDia[fecha] = Number(ventasPorDia[fecha] || 0) + cantidad;
@@ -896,7 +896,7 @@ function calcularHistorialDesdeLogs(desde = '', hasta = ''){
 
     if (log.tipo === 'eliminacion-venta') {
       porProducto[productoId].vendidos -= cantidad;
-      porProducto[productoId].beaTotal -= totalBea;
+      porProducto[productoId].yoelTotal -= totalyoel;
       porProducto[productoId].lauraTotal -= totalLaura;
 
       ventasPorDia[fecha] = Number(ventasPorDia[fecha] || 0) - cantidad;
@@ -906,7 +906,7 @@ function calcularHistorialDesdeLogs(desde = '', hasta = ''){
 
   Object.values(porProducto).forEach(p => {
     p.vendidos = Math.max(0, Number(p.vendidos || 0));
-    p.beaTotal = Number(p.beaTotal || 0);
+    p.yoelTotal = Number(p.yoelTotal || 0);
     p.lauraTotal = Number(p.lauraTotal || 0);
   });
 
@@ -940,7 +940,7 @@ function filtrarYOrdenar(data){
       case 'nombre': va = a.nombre.toLowerCase(); vb = b.nombre.toLowerCase(); return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
       case 'vendidos': va = a.vendidos; vb = b.vendidos; break;
       case 'laura': va = a.lauraTotal; vb = b.lauraTotal; break;
-      case 'bea': va = a.beaTotal; vb = b.beaTotal; break;
+      case 'yoel': va = a.yoelTotal; vb = b.yoelTotal; break;
       case 'stock': va = a.stock; vb = b.stock; break;
       case 'reservados': va = a.reservados; vb = b.reservados; break;
       default: va = a.vendidos; vb = b.vendidos;
@@ -1011,7 +1011,7 @@ function renderProductoDestacado(rows){
         </div>
 
         <div style="font-size:14px;font-weight:bold;color:#475569">
-          Estado: ${estadoTexto} · Bea: ${formatEuro(top.beaTotal)} · Cuota: ${top.porcentaje.toFixed(1)}%
+          Estado: ${estadoTexto} · yoel: ${formatEuro(top.yoelTotal)} · Cuota: ${top.porcentaje.toFixed(1)}%
         </div>
 
         <div class="destacado-acciones">
@@ -1024,16 +1024,16 @@ function renderProductoDestacado(rows){
 }
 
 function renderKPIs(rows){
-  const totalBea = rows.reduce((acc,p) => acc + p.beaTotal, 0);
+  const totalyoel = rows.reduce((acc,p) => acc + p.yoelTotal, 0);
   const totalLaura = rows.reduce((acc,p) => acc + p.lauraTotal, 0);
   const totalVendidos = rows.reduce((acc,p) => acc + p.vendidos, 0);
   const totalReservados = rows.reduce((acc,p) => acc + p.reservados, 0);
   const agotados = rows.filter(p => p.stock === 0).length;
   const stockBajo = rows.filter(p => p.stock > 0 && p.stock <= 5).length;
   const stockActual = rows.reduce((acc,p) => acc + p.stock, 0);
-  const diferencia = totalLaura - totalBea;
+  const diferencia = totalLaura - totalyoel;
 
-  document.getElementById('kpiBea').textContent = formatEuro(totalBea);
+  document.getElementById('kpiyoel').textContent = formatEuro(totalyoel);
   document.getElementById('kpiLaura').textContent = formatEuro(totalLaura);
   document.getElementById('kpiDiferencia').textContent = formatEuro(diferencia);
   document.getElementById('kpiVendidos').textContent = totalVendidos;
@@ -1132,7 +1132,7 @@ function renderTablaPrincipal(rows){
         <td>${p.proximo}</td>
         <td>${p.reservados}</td>
         <td style="font-size:17px;color:#28a745;font-weight:bold">${p.vendidos}</td>
-        <td style="color:#28a745;font-weight:bold">${formatEuro(p.beaTotal)}</td>
+        <td style="color:#28a745;font-weight:bold">${formatEuro(p.yoelTotal)}</td>
         <td style="color:#007bff;font-weight:bold">${formatEuro(p.lauraTotal)}</td>
         <td style="color:#f59e0b;font-weight:bold">${p.porcentaje.toFixed(1)}%</td>
         <td>${estado}</td>
@@ -1216,11 +1216,11 @@ function getNetosEnPeriodo(desde, hasta){
   const hist = calcularHistorialDesdeLogs(desde, hasta);
   const ventas = Object.values(hist.ventasPorDia).reduce((acc, n) => acc + Number(n || 0), 0);
   const ingresosLaura = Object.values(hist.ingresosPorDia).reduce((acc, n) => acc + Number(n || 0), 0);
-  const ingresosBea = Object.values(hist.porProducto || {}).reduce((acc, p) => acc + Number(p?.beaTotal || 0), 0);
-  const diferencia = ingresosLaura - ingresosBea;
+  const ingresosyoel = Object.values(hist.porProducto || {}).reduce((acc, p) => acc + Number(p?.yoelTotal || 0), 0);
+  const diferencia = ingresosLaura - ingresosyoel;
   return {
     ventas: Math.max(0, ventas),
-    ingresosBea: Math.max(0, ingresosBea),
+    ingresosyoel: Math.max(0, ingresosyoel),
     ingresosLaura: Math.max(0, ingresosLaura),
     diferencia
   };
@@ -1292,7 +1292,7 @@ function renderPeriodos(desdeFiltro, hastaFiltro){
     return `<tr>
       <td><strong>${p.label}</strong><br><small>${formatFecha(p.desde)} → ${formatFecha(p.hasta)}</small></td>
       <td>${neto.ventas}</td>
-      <td>${formatEuro(neto.ingresosBea)}</td>
+      <td>${formatEuro(neto.ingresosyoel)}</td>
       <td>${formatEuro(neto.ingresosLaura)}</td>
       <td><span class="${diffClass}">${formatEuro(neto.diferencia)}</span></td>
     </tr>`;
@@ -1325,7 +1325,7 @@ function calcularResumenMensual(desde = '', hasta = ''){
 
   while (cursor <= ultimoMes) {
     const clave = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2,'0')}`;
-    mesesMap[clave] = { ventas: 0, ingresosLaura: 0, ingresosBea: 0 };
+    mesesMap[clave] = { ventas: 0, ingresosLaura: 0, ingresosyoel: 0 };
     cursor.setMonth(cursor.getMonth() + 1);
   }
 
@@ -1341,38 +1341,38 @@ function calcularResumenMensual(desde = '', hasta = ''){
     const productoId = log.productoId || '';
     const fecha = ymd(log.timestamp);
     const mes = getClaveMes(fecha);
-    if (!mesesMap[mes]) mesesMap[mes] = { ventas: 0, ingresosLaura: 0, ingresosBea: 0 };
+    if (!mesesMap[mes]) mesesMap[mes] = { ventas: 0, ingresosLaura: 0, ingresosyoel: 0 };
 
     const detalles = String(log.detalles || '');
-    const beaMatch = detalles.match(/Bea:?€?\s*([0-9]+(?:\.[0-9]+)?)/i);
+    const yoelMatch = detalles.match(/yoel:?€?\s*([0-9]+(?:\.[0-9]+)?)/i);
     const lauraMatch = detalles.match(/Laura:?€?\s*([0-9]+(?:\.[0-9]+)?)/i);
-    if (beaMatch || lauraMatch) {
+    if (yoelMatch || lauraMatch) {
       lastKnownPrices[productoId] = {
-        bea: beaMatch ? Number(beaMatch[1]) : Number(lastKnownPrices[productoId]?.bea || 0),
+        yoel: yoelMatch ? Number(yoelMatch[1]) : Number(lastKnownPrices[productoId]?.yoel || 0),
         laura: lauraMatch ? Number(lauraMatch[1]) : Number(lastKnownPrices[productoId]?.laura || 0)
       };
     }
 
     const cantidad = Number(log.cantidad || 0);
     const productoActual = productos[productoId] || {};
-    const beaUnit = Number(lastKnownPrices[productoId]?.bea || productoActual.bea || 0);
+    const yoelUnit = Number(lastKnownPrices[productoId]?.yoel || productoActual.yoel || 0);
     const lauraUnit = Number(lastKnownPrices[productoId]?.laura || productoActual.laura || 0);
 
-    let totalBea = Number(log.totalBea);
+    let totalyoel = Number(log.totalyoel);
     let totalLaura = Number(log.totalLaura);
-    if (!Number.isFinite(totalBea)) totalBea = beaUnit * cantidad;
+    if (!Number.isFinite(totalyoel)) totalyoel = yoelUnit * cantidad;
     if (!Number.isFinite(totalLaura)) totalLaura = lauraUnit * cantidad;
 
     if (log.tipo === 'venta' || log.tipo === 'venta-desde-reserva') {
       mesesMap[mes].ventas += cantidad;
       mesesMap[mes].ingresosLaura += totalLaura;
-      mesesMap[mes].ingresosBea += totalBea;
+      mesesMap[mes].ingresosyoel += totalyoel;
     }
 
     if (log.tipo === 'eliminacion-venta') {
       mesesMap[mes].ventas -= cantidad;
       mesesMap[mes].ingresosLaura -= totalLaura;
-      mesesMap[mes].ingresosBea -= totalBea;
+      mesesMap[mes].ingresosyoel -= totalyoel;
     }
   }
 
@@ -1381,9 +1381,9 @@ function calcularResumenMensual(desde = '', hasta = ''){
       clave,
       nombre: nombreMesDesdeClave(clave),
       ventas: Math.max(0, Number(datos.ventas || 0)),
-      ingresosBea: Number(datos.ingresosBea || 0),
+      ingresosyoel: Number(datos.ingresosyoel || 0),
       ingresosLaura: Number(datos.ingresosLaura || 0),
-      diferencia: Number(datos.ingresosLaura || 0) - Number(datos.ingresosBea || 0)
+      diferencia: Number(datos.ingresosLaura || 0) - Number(datos.ingresosyoel || 0)
     }))
     .sort((a,b) => a.clave.localeCompare(b.clave));
 }
@@ -1395,7 +1395,7 @@ function dibujarChartMeses(resumenMeses){
 
   const labels = resumenMeses.map(m => m.nombre);
   const dataLaura = resumenMeses.map(m => Number(m.ingresosLaura.toFixed(2)));
-  const dataBea = resumenMeses.map(m => Number(m.ingresosBea.toFixed(2)));
+  const datayoel = resumenMeses.map(m => Number(m.ingresosyoel.toFixed(2)));
 
   mesesChart = new Chart(ctx, {
     type: 'bar',
@@ -1408,8 +1408,8 @@ function dibujarChartMeses(resumenMeses){
           borderWidth: 1
         },
         {
-          label: 'Bea €',
-          data: dataBea,
+          label: 'yoel €',
+          data: datayoel,
           borderWidth: 1
         }
       ]
@@ -1436,7 +1436,7 @@ function dibujarChartBeneficioMeses(resumenMeses){
     data: {
       labels,
       datasets: [{
-        label: 'Beneficio € (Laura - Bea)',
+        label: 'Beneficio € (Laura - yoel)',
         data: dataBeneficio,
         borderWidth: 2,
         fill: false,
@@ -1472,7 +1472,7 @@ function renderRankingMeses(){
       <td>${i + 1}</td>
       <td style="text-align:left">${m.nombre}</td>
       <td>${formatEuro(m.ingresosLaura)}</td>
-      <td>${formatEuro(m.ingresosBea)}</td>
+      <td>${formatEuro(m.ingresosyoel)}</td>
       <td><span class="${clase}">${formatEuro(m.diferencia)}</span></td>
       <td>${m.ventas}</td>
     </tr>`;
@@ -1516,15 +1516,15 @@ function renderResumenMensual(){
   const añoActual = new Date().getFullYear();
   const mesesAño = resumenMeses.filter(m => m.clave.startsWith(String(añoActual)));
   const totalAñoLaura = mesesAño.reduce((acc,m)=>acc+m.ingresosLaura,0);
-  const totalAñoBea = mesesAño.reduce((acc,m)=>acc+m.ingresosBea,0);
-  const totalAñoBeneficio = totalAñoLaura - totalAñoBea;
+  const totalAñoyoel = mesesAño.reduce((acc,m)=>acc+m.ingresosyoel,0);
+  const totalAñoBeneficio = totalAñoLaura - totalAñoyoel;
   const claseBeneficio = totalAñoBeneficio > 0 ? 'money-positive' : (totalAñoBeneficio < 0 ? 'money-negative' : 'money-neutral');
 
   wrap.innerHTML = `
     <div>🏆 Mejor mes automático: <strong>${mejorMes.nombre}</strong> con <strong>${formatEuro(mejorMes.ingresosLaura)}</strong> de Laura.</div>
     <div style="margin-top:6px">${crecimientoHtml}</div>
     <div style="margin-top:6px">${alertaHtml}</div>
-    <div style="margin-top:6px">📅 Año en curso (${añoActual}): Laura ${formatEuro(totalAñoLaura)} · Bea ${formatEuro(totalAñoBea)} · Beneficio <span class="${claseBeneficio}">${formatEuro(totalAñoBeneficio)}</span></div>
+    <div style="margin-top:6px">📅 Año en curso (${añoActual}): Laura ${formatEuro(totalAñoLaura)} · yoel ${formatEuro(totalAñoyoel)} · Beneficio <span class="${claseBeneficio}">${formatEuro(totalAñoBeneficio)}</span></div>
   `;
 }
 
@@ -1532,7 +1532,7 @@ window.volver = () => window.location.href = 'index.html';
 window.imprimir = () => window.print();
 
 window.descargarCSV = () => {
-  const filas = [["Pos","Producto","Stock","Proximo","Reservados","Vendidos","Bea","Laura","Porcentaje","Imagen"]];
+  const filas = [["Pos","Producto","Stock","Proximo","Reservados","Vendidos","yoel","Laura","Porcentaje","Imagen"]];
   filasFiltradas.forEach((p, i) => {
     filas.push([
       i + 1,
@@ -1541,7 +1541,7 @@ window.descargarCSV = () => {
       p.proximo,
       p.reservados,
       p.vendidos,
-      p.beaTotal.toFixed(2),
+      p.yoelTotal.toFixed(2),
       p.lauraTotal.toFixed(2),
       p.porcentaje.toFixed(1) + '%',
       p.imagen || ''
