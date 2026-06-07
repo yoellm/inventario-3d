@@ -745,7 +745,7 @@ window.irEditarProducto = irEditarProducto;
 
 onAuthStateChanged(auth, (user) => {
   const status = document.getElementById('status');
-  if (!user || user.email !== 'nilose2014@gmail.com') {
+  if (!user || user.email !== 'yoelmejias@outlook.es') {
     status.className = 'error';
     status.textContent = '❌ Solo el ADMIN puede ver esta página';
     setTimeout(() => window.location.href = 'index.html', 2000);
