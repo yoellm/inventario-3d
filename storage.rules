@@ -1,0 +1,18 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /productos/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email in [
+          'yoelmejias@outlook.es',
+          'irelandmorcillo@gmail.com',
+          'djsubixj@gmail.com',
+          'xiomaralamasmala@gmail.com'
+        ]
+        && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

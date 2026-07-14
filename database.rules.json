@@ -1,0 +1,39 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "productos": {
+      ".read": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com' || auth.token.email == 'djsubixj@gmail.com' || auth.token.email == 'xiomaralamasmala@gmail.com')",
+      "$productoId": {
+        ".write": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com' || auth.token.email == 'djsubixj@gmail.com' || auth.token.email == 'xiomaralamasmala@gmail.com')",
+        ".validate": "(auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com') || (data.exists() && newData.exists() && newData.child('nombre').val() == data.child('nombre').val() && newData.child('yoel').val() == data.child('yoel').val() && newData.child('proximo').val() == data.child('proximo').val() && newData.child('ocultoIndex').val() == data.child('ocultoIndex').val())"
+      }
+    },
+    "productos_publicos": {
+      ".read": true,
+      "$productoId": {
+        ".write": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com' || auth.token.email == 'djsubixj@gmail.com' || auth.token.email == 'xiomaralamasmala@gmail.com')",
+        ".validate": "!newData.exists() || (newData.hasChildren(['nombre','laura','stock']) && newData.child('nombre').isString() && newData.child('laura').isNumber() && newData.child('stock').isNumber())"
+      }
+    },
+    "logs": {
+      ".read": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com')",
+      ".write": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com')",
+      "$logId": {
+        ".write": "auth != null && !data.exists() && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com' || auth.token.email == 'djsubixj@gmail.com' || auth.token.email == 'xiomaralamasmala@gmail.com')"
+      }
+    },
+    "liquidaciones": {
+      ".read": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com')",
+      ".write": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com')"
+    },
+    "gastos": {
+      ".read": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com')",
+      ".write": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com')"
+    },
+    "backup": {
+      ".read": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com')",
+      ".write": "auth != null && (auth.token.email == 'yoelmejias@outlook.es' || auth.token.email == 'irelandmorcillo@gmail.com')"
+    }
+  }
+}

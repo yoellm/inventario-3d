@@ -1,0 +1,19 @@
+{
+  "name": "Mundo Azul · Inventario 3D",
+  "short_name": "Mundo Azul",
+  "description": "Stock, ventas, reservas y liquidaciones de Mundo Azul",
+  "lang": "es",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f5fa",
+  "theme_color": "#f7f5fa",
+  "icons": [
+    {
+      "src": "app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

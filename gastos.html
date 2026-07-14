@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f5fa">
+  <title>Finanzas y gastos · Mundo Azul</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="finanzas.css">
+  <link rel="stylesheet" href="theme-dark.css">
+</head>
+<body class="finance-page">
+  <header class="app-header">
+    <img src="logo.png" class="logo-app" alt="Mundo Azul">
+    <div class="app-header-text">
+      <h2>Mundo Azul</h2>
+      <p class="hero-subtitle">Gestión de inventario y ventas</p>
+    </div>
+  </header>
+
+  <nav class="app-nav" aria-label="Navegación principal">
+    <a href="index.html">Inventario</a>
+    <a href="estadisticas.html">Estadísticas</a>
+    <a href="logs.html">Movimientos</a>
+    <a class="active" href="gastos.html">Finanzas</a>
+    <a href="scanner.html">Escáner QR</a>
+  </nav>
+
+  <div class="app-shell">
+    <div id="financeStatus" class="finance-loading">Comprobando acceso…</div>
+
+    <main id="financeApp" class="hidden">
+      <section class="finance-intro">
+        <div>
+          <span class="eyebrow">CONTROL ECONÓMICO</span>
+          <h1>¿Cuánto has invertido y cuánto has ganado?</h1>
+          <p>El resultado se calcula usando el importe de las ventas que corresponde a Yoel menos los gastos registrados.</p>
+        </div>
+        <button class="primary-action" onclick="focusNuevoGasto()">Añadir gasto</button>
+      </section>
+
+      <section class="finance-filters" aria-label="Filtros financieros">
+        <div class="filter-field">
+          <label for="fechaDesde">Desde</label>
+          <input id="fechaDesde" type="date" onchange="renderTodo()">
+        </div>
+        <div class="filter-field">
+          <label for="fechaHasta">Hasta</label>
+          <input id="fechaHasta" type="date" onchange="renderTodo()">
+        </div>
+        <div class="period-actions">
+          <button onclick="setPeriodo('mes')">Este mes</button>
+          <button onclick="setPeriodo('anio')">Este año</button>
+          <button onclick="setPeriodo('todo')">Todo</button>
+        </div>
+      </section>
+
+      <section class="finance-kpis">
+        <article class="finance-kpi income">
+          <span>Para Yoel por ventas</span>
+          <strong id="kpiIngresosYoel">0,00 €</strong>
+          <small id="kpiUnidades">0 unidades vendidas</small>
+        </article>
+        <article class="finance-kpi expense">
+          <span>Gastos e inversión</span>
+          <strong id="kpiGastos">0,00 €</strong>
+          <small id="kpiGastosCount">0 gastos registrados</small>
+        </article>
+        <article class="finance-kpi neutral">
+          <span>Invertido en materiales</span>
+          <strong id="kpiMateriales">0,00 €</strong>
+          <small>Filamento y materias primas</small>
+        </article>
+        <article class="finance-kpi result" id="resultadoCard">
+          <span>Resultado neto de Yoel</span>
+          <strong id="kpiResultado">0,00 €</strong>
+          <small>Ventas para Yoel − gastos</small>
+        </article>
+        <article class="finance-kpi neutral">
+          <span>Total cobrado a clientes</span>
+          <strong id="kpiCobrado">0,00 €</strong>
+          <small>Importe total de las ventas</small>
+        </article>
+        <article class="finance-kpi neutral">
+          <span>Ganancia de la vendedora</span>
+          <strong id="kpiVendedora">0,00 €</strong>
+          <small>Total cobrado − parte de Yoel</small>
+        </article>
+      </section>
+
+      <div class="finance-grid">
+        <section class="finance-card" id="nuevoGastoCard">
+          <div class="finance-card-head">
+            <div>
+              <span class="eyebrow">REGISTRO</span>
+              <h2 id="formTitle">Nuevo gasto</h2>
+            </div>
+            <button id="cancelEditBtn" class="secondary hidden" onclick="cancelarEdicion()">Cancelar edición</button>
+          </div>
+
+          <div class="expense-form">
+            <div class="form-field">
+              <label for="gastoFecha">Fecha *</label>
+              <input id="gastoFecha" type="date">
+            </div>
+            <div class="form-field">
+              <label for="gastoCategoria">Categoría *</label>
+              <select id="gastoCategoria">
+                <option value="materiales">Materiales y filamento</option>
+                <option value="maquinaria">Maquinaria y herramientas</option>
+                <option value="embalaje">Embalaje y envíos</option>
+                <option value="mantenimiento">Mantenimiento y repuestos</option>
+                <option value="publicidad">Publicidad y diseño</option>
+                <option value="servicios">Servicios y comisiones</option>
+                <option value="otros">Otros</option>
+              </select>
+            </div>
+            <div class="form-field span-2">
+              <label for="gastoConcepto">Concepto *</label>
+              <input id="gastoConcepto" maxlength="140" placeholder="Ej. Bobinas PLA para nuevos muñecos">
+            </div>
+            <div class="form-field">
+              <label for="gastoImporte">Importe € *</label>
+              <input id="gastoImporte" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0,00">
+            </div>
+            <div class="form-field">
+              <label for="gastoProveedor">Proveedor</label>
+              <input id="gastoProveedor" maxlength="100" placeholder="Nombre o tienda">
+            </div>
+            <div class="form-field">
+              <label for="gastoMetodo">Forma de pago</label>
+              <select id="gastoMetodo">
+                <option value="">Sin indicar</option>
+                <option value="tarjeta">Tarjeta</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="paypal">PayPal</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="gastoNotas">Notas</label>
+              <input id="gastoNotas" maxlength="240" placeholder="Opcional">
+            </div>
+          </div>
+
+          <button id="guardarGastoBtn" class="primary-action full" onclick="guardarGasto()">Guardar gasto</button>
+        </section>
+
+        <section class="finance-card">
+          <div class="finance-card-head">
+            <div>
+              <span class="eyebrow">DISTRIBUCIÓN</span>
+              <h2>Gastos por categoría</h2>
+            </div>
+          </div>
+          <div id="categoriasResumen" class="category-summary"></div>
+        </section>
+      </div>
+
+      <section class="finance-card">
+        <div class="finance-card-head">
+          <div>
+            <span class="eyebrow">EVOLUCIÓN</span>
+            <h2>Resultado por mes</h2>
+          </div>
+        </div>
+        <div id="mesesResumen" class="month-summary"></div>
+      </section>
+
+      <section class="finance-card">
+        <div class="finance-card-head expense-list-head">
+          <div>
+            <span class="eyebrow">DETALLE</span>
+            <h2>Gastos registrados</h2>
+          </div>
+          <div class="expense-list-tools">
+            <input id="buscarGasto" placeholder="Buscar concepto o proveedor…" oninput="renderTodo()">
+            <select id="filtroCategoria" onchange="renderTodo()">
+              <option value="todos">Todas las categorías</option>
+              <option value="materiales">Materiales y filamento</option>
+              <option value="maquinaria">Maquinaria y herramientas</option>
+              <option value="embalaje">Embalaje y envíos</option>
+              <option value="mantenimiento">Mantenimiento y repuestos</option>
+              <option value="publicidad">Publicidad y diseño</option>
+              <option value="servicios">Servicios y comisiones</option>
+              <option value="otros">Otros</option>
+            </select>
+            <button class="secondary" onclick="exportarGastosCSV()">Exportar CSV</button>
+          </div>
+        </div>
+
+        <div id="gastosEmpty" class="empty-finance">No hay gastos en este periodo.</div>
+        <div id="gastosTableWrap" class="finance-table-wrap hidden">
+          <table class="finance-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Concepto</th>
+                <th>Categoría</th>
+                <th>Proveedor</th>
+                <th>Pago</th>
+                <th>Importe</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaGastos"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="finance-disclaimer">Resultado orientativo antes de impuestos. Se calcula según los movimientos de venta disponibles en el historial.</p>
+    </main>
+  </div>
+
+  <div id="financeToast" class="finance-toast" role="status"></div>
+
+  <script src="firebase-config.js" defer></script>
+  <script src="app-bootstrap.js" defer></script>
+  <script src="gastos.js" defer></script>
+
+  <script src="pwa-register.js" defer></script>
+</body>
+</html>
