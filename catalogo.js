@@ -22,17 +22,20 @@
 
   function disponibilidad(producto) {
     const stock = Number(producto.stock || 0);
-    if (stock <= 0) return { key: 'out', text: 'Agotado' };
-    if (stock <= 3) return { key: 'low', text: 'Últimas unidades' };
-    return { key: 'available', text: 'Disponible' };
+    if (stock > 0 && stock <= 3) return { key: 'low', text: 'Últimas unidades' };
+    if (stock > 3) return { key: 'available', text: 'En stock' };
+    if (producto.porEncargo) return { key: 'order', text: 'Por encargo' };
+    return { key: 'out', text: 'Agotado' };
   }
 
   function productosFiltrados() {
     const texto = normalizarTexto(state.texto);
     const items = state.productos.filter(producto => {
       if (texto && !normalizarTexto(producto.nombre).includes(texto)) return false;
-      if (state.filtro === 'disponibles' && Number(producto.stock || 0) <= 0) return false;
-      if (state.filtro === 'agotados' && Number(producto.stock || 0) > 0) return false;
+      const stock = Number(producto.stock || 0);
+      if (state.filtro === 'disponibles' && stock <= 0) return false;
+      if (state.filtro === 'encargo' && !producto.porEncargo) return false;
+      if (state.filtro === 'agotados' && (stock > 0 || producto.porEncargo)) return false;
       return true;
     });
 
@@ -82,6 +85,12 @@
     const badge = document.getElementById('dialogAvailability');
     badge.className = `availability-badge ${info.key}`;
     badge.textContent = info.text;
+    const message = document.getElementById('dialogAvailabilityMessage');
+    message.textContent = info.key === 'order'
+      ? 'Este producto se fabrica por encargo. Consulta el plazo de realización antes de hacer tu pedido.'
+      : info.key === 'out'
+        ? 'Este producto no está disponible actualmente.'
+        : 'Producto disponible. Consulta para realizar tu pedido.';
     dialog.showModal();
   }
 
@@ -133,7 +142,8 @@
         nombre: String(producto?.nombre || '').trim(),
         laura: Math.max(0, Number(producto?.laura || 0)),
         stock: Math.max(0, Number(producto?.stock || 0)),
-        imagen: String(producto?.imagen || '')
+        imagen: String(producto?.imagen || ''),
+        porEncargo: producto?.porEncargo === true
       }))
       .filter(producto => producto.nombre && producto.laura > 0);
   }

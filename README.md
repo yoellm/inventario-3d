@@ -5,6 +5,7 @@ Aplicación web para gestionar el stock cedido a la persona que realiza las vent
 ## Flujo de trabajo
 
 1. El administrador crea los productos e indica el stock, el importe para Yoel y el precio final de venta.
+   Si un artículo no está fabricado pero puede realizarse bajo pedido, puede marcarlo como **Disponible por encargo**; aparecerá así en el catálogo aunque tenga stock 0.
 2. La vendedora registra ventas o reservas desde el inventario o mediante QR.
 3. La cabecera muestra las cantidades todavía pendientes: total cobrado, importe para Yoel y ganancia de la vendedora.
 4. Cuando se entrega el dinero, el administrador pulsa **Cerrar liquidación**.
@@ -44,6 +45,8 @@ Aplicación web para gestionar el stock cedido a la persona que realiza las vent
 - `app-icon-192.png`, `app-icon-512.png`, `app-icon-maskable-512.png` y `apple-touch-icon.png`: iconos para Android, iPhone y accesos directos.
 
 ## Seguridad
+
+El inicio de sesión se realiza una sola vez en `index.html` y se conserva en el navegador. Las pantallas privadas reutilizan esa sesión; si ha caducado, vuelven al acceso principal y regresan automáticamente a la pantalla solicitada después de identificarse.
 
 Las comprobaciones visuales del navegador no sustituyen las reglas de Firebase. Después de revisar los correos autorizados, las reglas incluidas deben publicarse en el proyecto `savvy-nature-200119` desde Firebase Console o Firebase CLI.
 

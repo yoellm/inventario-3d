@@ -123,6 +123,7 @@ button { cursor: pointer; }
 .card-media .availability-badge { position: absolute; top: 12px; left: 12px; box-shadow: 0 1px 4px rgba(29,27,32,.12); }
 .availability-badge.available { color: var(--success); background: var(--success-soft); }
 .availability-badge.low { color: var(--warning); background: var(--warning-soft); }
+.availability-badge.order { color: #4f378b; background: #eadcff; }
 .availability-badge.out { color: var(--danger); background: var(--danger-soft); }
 .card-content { display: grid; min-height: 116px; padding: 16px; align-content: space-between; gap: 16px; }
 .card-name { margin: 0; overflow: hidden; font-size: 16px; line-height: 1.3; font-weight: 600; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }

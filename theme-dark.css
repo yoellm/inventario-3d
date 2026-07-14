@@ -364,11 +364,22 @@ input[type="file"]::file-selector-button {
   margin: 56px auto !important;
   padding: 28px !important;
 }
+.login-card:hover { transform: none !important; }
 
 .login-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 16px !important; }
 .login-field { display: grid; gap: 6px; min-width: 0; }
 .login-field input { width: 100%; }
-.login-actions { margin-top: 22px; }
+.login-actions {
+  display: flex !important;
+  margin-top: 22px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.login-actions > * { margin: 0 !important; }
+.login-actions > button { min-width: 94px; min-height: 42px; }
+.login-actions > button:first-child { color: #fff !important; background: var(--md-primary) !important; }
+.login-actions > .material-text { border-color: transparent !important; }
 .public-catalog-link {
   display: inline-flex;
   min-height: 42px;
@@ -389,13 +400,30 @@ input[type="file"]::file-selector-button {
 .input-pass-wrap input { padding-right: 92px !important; }
 .toggle-pass-btn {
   position: absolute;
-  right: 6px;
+  right: 7px;
   top: 6px;
+  width: auto !important;
+  min-width: 76px !important;
+  height: 36px !important;
   min-height: 36px;
+  margin: 0 !important;
   padding: 0 12px;
+  border: 0 !important;
+  border-radius: 8px !important;
   color: var(--md-primary) !important;
   background: transparent !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  font-weight: 600;
   transform: none !important;
+}
+.toggle-pass-btn:hover { background: var(--md-primary-container) !important; transform: none !important; }
+
+@media (max-width: 520px) {
+  .login-card { width: calc(100% - 24px); padding: 22px 18px !important; }
+  .login-actions { display: grid !important; grid-template-columns: 1fr 1fr; }
+  .login-actions > button { width: 100%; }
+  .login-actions > .public-catalog-link { grid-column: 1 / -1; width: 100%; }
 }
 
 /* Dashboard */
@@ -941,6 +969,33 @@ tbody tr:hover td,
 }
 #productEditorModal .form-campo small { display: block; margin-top: 6px; color: var(--md-muted); font-size: 11px; }
 
+#productEditorModal .product-order-toggle {
+  display: flex;
+  min-height: 68px;
+  padding: 12px 14px;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--md-outline-soft);
+  border-radius: var(--md-radius);
+  background: var(--md-surface-2);
+  cursor: pointer;
+}
+
+#productEditorModal .product-order-toggle input {
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--md-primary);
+}
+
+#productEditorModal .product-order-toggle span { display: grid; gap: 2px; }
+#productEditorModal .product-order-toggle strong { color: var(--md-text); font-size: 13px; font-weight: 600; }
+#productEditorModal .product-order-toggle small { color: var(--md-muted); font-size: 11px; line-height: 1.35; }
+#productEditorModal .product-order-toggle:has(input:focus-visible) { outline: 3px solid rgba(103,80,164,.2); outline-offset: 2px; }
+
 #productEditorModal .product-editor-actions {
   display: flex;
   align-items: center;
@@ -1147,6 +1202,20 @@ tbody tr:hover td,
   text-align: left !important;
   text-overflow: ellipsis;
   white-space: normal;
+}
+
+#mainApp #tabla .inventory-order-chip {
+  display: block;
+  width: fit-content;
+  margin-top: 4px;
+  padding: 3px 7px;
+  color: #4f378b;
+  border-radius: 999px;
+  background: #eadcff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
 }
 
 #mainApp #tabla .stock-cell { min-width: 72px; white-space: nowrap; }

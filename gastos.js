@@ -74,6 +74,15 @@
       const detalles = String(log?.detalles || '');
       const producto = productos[log?.productoId] || {};
 
+      if (['venta-propia', 'eliminacion-venta-propia'].includes(log?.tipo)) {
+        const precioPropio = numeroValido(log?.precioVentaPropia ?? log?.precioyoel)
+          ?? numeroValido(producto?.yoel ?? producto?.bea)
+          ?? 0;
+        const totalPropio = numeroValido(log?.totalVentaPropia ?? log?.totalyoel ?? log?.totalLaura)
+          ?? precioPropio * cantidad;
+        return { cantidad, paraYoel: totalPropio, cobrado: totalPropio };
+      }
+
       const yoelMatch = detalles.match(/(?:yoel|Bea):?€?\s*([0-9]+(?:\.[0-9]+)?)/i);
       const ventaMatch = detalles.match(/Laura:?€?\s*([0-9]+(?:\.[0-9]+)?)/i);
 
@@ -435,8 +444,8 @@
       if (!user || !ADMIN_EMAILS.includes(user.email || '')) {
         document.body.classList.remove('auth-nav-visible');
         status.className = 'finance-loading error';
-        status.textContent = 'Acceso reservado a administradores. Volviendo al inventario…';
-        setTimeout(() => window.location.href = 'index.html', 1800);
+        status.textContent = 'Comprobando sesión…';
+        window.INVENTARIO_BOOT.redirectToLogin();
         return;
       }
 

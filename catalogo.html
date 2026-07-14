@@ -47,7 +47,8 @@
 
       <div class="availability-tabs" role="group" aria-label="Filtrar por disponibilidad">
         <button type="button" class="active" data-filter="todos">Todos</button>
-        <button type="button" data-filter="disponibles">Disponibles</button>
+        <button type="button" data-filter="disponibles">En stock</button>
+        <button type="button" data-filter="encargo">Por encargo</button>
         <button type="button" data-filter="agotados">Agotados</button>
       </div>
 
@@ -93,7 +94,7 @@
       <span id="dialogAvailability" class="availability-badge"></span>
       <h2 id="dialogName">Producto</h2>
       <div id="dialogPrice" class="dialog-price">0,00 €</div>
-      <p>Consulta la disponibilidad para realizar tu pedido.</p>
+      <p id="dialogAvailabilityMessage">Consulta la disponibilidad para realizar tu pedido.</p>
       <button type="button" class="dialog-done" id="dialogDone">Seguir viendo</button>
     </div>
   </dialog>

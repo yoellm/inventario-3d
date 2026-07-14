@@ -167,11 +167,10 @@
 
     if (!user || !role) {
       stockApp.classList.add('hidden');
-      loginDiv.classList.remove('hidden');
       if (user && !role) {
-        document.getElementById('loginStatus').textContent = 'Esta cuenta no tiene permiso para consultar el stock.';
         await signOut(auth).catch(() => {});
       }
+      window.INVENTARIO_BOOT.redirectToLogin();
       return;
     }
 

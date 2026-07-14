@@ -75,13 +75,20 @@ function tipoClase(tipo){
 
     function extraerImportes(log){
       const detalles = String(log?.detalles || '');
+      const cantidad = Number(log?.cantidad || 0);
+
+      if (['venta-propia', 'eliminacion-venta-propia'].includes(log?.tipo)) {
+        const precioPropio = Number(log?.precioVentaPropia ?? log?.precioyoel ?? 0);
+        const totalPropio = Number(log?.totalVentaPropia ?? log?.totalyoel ?? log?.totalLaura ?? (precioPropio * cantidad));
+        return { bea: totalPropio, laura: totalPropio, margen: 0 };
+      }
+
       const beaDirect = Number(log?.precioyoel ?? log?.totalyoel ?? log?.precioBea ?? log?.totalBea ?? 0);
       const lauraDirect = Number(log?.precioLaura ?? log?.totalLaura ?? 0);
 
       const beaMatch = detalles.match(/(?:yoel|Bea):€\s*([0-9]+(?:\.[0-9]+)?)/i);
       const lauraMatch = detalles.match(/Laura:€([0-9]+(?:\.[0-9]+)?)/);
 
-      const cantidad = Number(log?.cantidad || 0);
       const beaUnit = beaDirect || (beaMatch ? Number(beaMatch[1]) : 0);
       const lauraUnit = lauraDirect || (lauraMatch ? Number(lauraMatch[1]) : 0);
       const bea = log?.totalyoel != null ? Number(log.totalyoel) : log?.totalBea != null ? Number(log.totalBea) : beaUnit * cantidad;
@@ -478,7 +485,7 @@ if (['usuario-conectado','consulta-producto','venta','venta-desde-reserva','rese
       } else {
         document.body.classList.remove('auth-nav-visible');
         mainApp.classList.add('hidden');
-        loginDiv.classList.remove('hidden');
+        window.INVENTARIO_BOOT.redirectToLogin();
       }
     });
 

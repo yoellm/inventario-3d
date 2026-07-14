@@ -37,7 +37,7 @@
 
 <div class="app-shell">
 
-  <div class="card login-card" id="loginDiv">
+  <div class="card login-card hidden" id="loginDiv">
     <div class="section-head compact">
       <div>
         <h3>Iniciar sesión</h3>
@@ -55,7 +55,7 @@
         <label for="userPass">Contraseña</label>
         <div class="input-pass-wrap">
           <input id="userPass" type="password" placeholder="Contraseña" autocomplete="current-password">
-          <button type="button" class="toggle-pass-btn" onclick="togglePassword()" aria-label="Mostrar contraseña">Mostrar</button>
+          <button type="button" class="toggle-pass-btn" onclick="togglePassword()" aria-label="Mostrar contraseña" aria-pressed="false">Mostrar</button>
         </div>
       </div>
     </div>
@@ -352,6 +352,14 @@
           <label for="laura">Precio de venta</label>
           <input id="laura" type="number" min="0" step="0.01" placeholder="0.00">
         </div>
+
+        <label class="product-order-toggle span-2" for="porEncargo">
+          <input id="porEncargo" type="checkbox">
+          <span>
+            <strong>Disponible por encargo</strong>
+            <small>Actívalo si puedes fabricar este producto aunque su stock sea 0.</small>
+          </span>
+        </label>
 
         <div class="form-campo span-2">
           <label for="fotoProducto">Fotografía</label>

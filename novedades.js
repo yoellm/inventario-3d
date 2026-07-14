@@ -252,11 +252,10 @@
 
     if (!user || !currentRole) {
       novedadesApp.classList.add('hidden');
-      loginDiv.classList.remove('hidden');
       if (user && !currentRole) {
-        document.getElementById('loginStatus').textContent = 'Esta cuenta no tiene permiso para consultar las novedades.';
         await signOut(auth).catch(() => {});
       }
+      window.INVENTARIO_BOOT.redirectToLogin();
       return;
     }
 

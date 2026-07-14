@@ -54,6 +54,10 @@
     return productos[document.getElementById('ventaPropiaProducto').value] || null;
   }
 
+  function importeTotalVentaPropia(sale) {
+    return Math.max(0, Number(sale?.totalVentaPropia ?? sale?.totalyoel ?? sale?.totalLaura ?? 0));
+  }
+
   function actualizarProductoSeleccionado(actualizarPrecio = false) {
     const product = productoSeleccionado();
     const info = document.getElementById('ventaPropiaStockInfo');
@@ -64,7 +68,7 @@
     const stock = Math.max(0, Number(product.stock || 0));
     info.textContent = `${product.nombre || 'Producto'} seleccionado · ${stock} unidad${stock === 1 ? '' : 'es'} disponible${stock === 1 ? '' : 's'}`;
     document.getElementById('ventaPropiaCantidad').max = Math.max(1, stock);
-    if (actualizarPrecio) document.getElementById('ventaPropiaPrecio').value = Number(product.laura || 0).toFixed(2);
+    if (actualizarPrecio) document.getElementById('ventaPropiaPrecio').value = Number(product.yoel || 0).toFixed(2);
     actualizarTotal();
   }
 
@@ -119,7 +123,7 @@
       const name = document.createElement('strong');
       name.textContent = product.nombre;
       const meta = document.createElement('span');
-      meta.textContent = money.format(Number(product.laura || 0));
+      meta.textContent = `Tu precio: ${money.format(Number(product.yoel || 0))}`;
       info.append(name, meta);
 
       const availability = document.createElement('span');
@@ -185,7 +189,7 @@
       if (sale.anulada) row.className = 'direct-sale-cancelled';
       const date = new Date(Number(sale.timestamp || Date.now())).toLocaleDateString('es-ES');
       const quantity = Math.max(0, Number(sale.cantidad || 0));
-      const total = Math.max(0, Number(sale.totalyoel ?? sale.totalLaura ?? 0));
+      const total = importeTotalVentaPropia(sale);
       const unitPrice = Number(sale.precioVentaPropia ?? (quantity ? total / quantity : 0));
       const statusCell = document.createElement('td');
       const badge = document.createElement('span');
@@ -220,7 +224,7 @@
     document.getElementById('ventasPropiasEmpty').classList.toggle('hidden', list.length > 0);
 
     const active = list.filter(sale => !sale.anulada);
-    document.getElementById('ventasPropiasIngresos').textContent = money.format(active.reduce((sum, sale) => sum + Number(sale.totalyoel ?? sale.totalLaura ?? 0), 0));
+    document.getElementById('ventasPropiasIngresos').textContent = money.format(active.reduce((sum, sale) => sum + importeTotalVentaPropia(sale), 0));
     document.getElementById('ventasPropiasUnidades').textContent = active.reduce((sum, sale) => sum + Number(sale.cantidad || 0), 0);
     document.getElementById('ventasPropiasOperaciones').textContent = active.length;
   }
@@ -272,9 +276,10 @@
         cantidad: quantity,
         precioVentaPropia: unitPrice,
         precioyoel: unitPrice,
-        precioLaura: unitPrice,
+        precioBaseProducto: Number(product.yoel || 0),
+        totalVentaPropia: total,
         totalyoel: total,
-        totalLaura: total,
+        totalCobrado: total,
         metodoCobro: paymentMethod,
         usuario: currentUser?.email || '',
         detalles: notes || `Venta propia · ${metodos[paymentMethod] || paymentMethod}`
@@ -311,7 +316,7 @@
       await syncPublicStock(sale.productoId, updatedProduct.stock);
 
       const correctionRef = push(logsRef);
-      const total = Number(sale.totalyoel ?? sale.totalLaura ?? 0);
+      const total = importeTotalVentaPropia(sale);
       const changes = {};
       changes[`logs/${saleId}/anulada`] = true;
       changes[`logs/${saleId}/anuladaEn`] = Date.now();
@@ -326,8 +331,10 @@
         productoImagen: sale.productoImagen || productos[sale.productoId]?.imagen || '',
         cantidad: Number(sale.cantidad || 0),
         precioVentaPropia: Number(sale.precioVentaPropia || 0),
+        precioyoel: Number(sale.precioVentaPropia || (Number(sale.cantidad || 0) ? total / Number(sale.cantidad || 0) : 0)),
+        totalVentaPropia: total,
         totalyoel: total,
-        totalLaura: total,
+        totalCobrado: total,
         usuario: currentUser?.email || '',
         detalles: 'Corrección de venta propia; stock devuelto'
       };
@@ -383,8 +390,8 @@
     if (!user || !ADMIN_EMAILS.includes(user.email || '')) {
       document.body.classList.remove('auth-nav-visible');
       status.className = 'page-status error';
-      status.textContent = 'Acceso reservado a administradores. Volviendo al inventario…';
-      setTimeout(() => window.location.href = 'index.html', 1800);
+      status.textContent = 'Comprobando sesión…';
+      window.INVENTARIO_BOOT.redirectToLogin();
       return;
     }
     currentUser = user;

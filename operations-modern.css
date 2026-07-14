@@ -185,6 +185,7 @@
 .direct-sale-form-card { padding: 24px !important; }
 .direct-sale-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
 .direct-sale-form label { display: grid; min-width: 0; gap: 7px; color: var(--md-muted); font-size: 12px; font-weight: 500; }
+.direct-sale-form label small { color: var(--md-muted); font-size: 10px; font-weight: 400; line-height: 1.35; }
 .direct-sale-form .span-2 { grid-column: 1 / -1; }
 .direct-sale-form input,
 .direct-sale-form select,

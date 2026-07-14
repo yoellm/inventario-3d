@@ -69,8 +69,8 @@ onAuthStateChanged(auth, (user) => {
   if (!user || !ADMIN_EMAILS.includes(user.email)) {
     document.body.classList.remove('auth-nav-visible');
     status.className = 'error';
-    status.textContent = 'Solo el administrador puede ver esta página';
-    setTimeout(() => window.location.href = 'index.html', 2000);
+    status.textContent = 'Comprobando sesión…';
+    window.INVENTARIO_BOOT.redirectToLogin();
     return;
   }
   document.body.classList.add('auth-nav-visible');

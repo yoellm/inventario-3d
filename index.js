@@ -2,7 +2,7 @@
 const [firebaseApp, firebaseDatabase, firebaseAuth, firebaseStorage] = await window.INVENTARIO_BOOT.loadFirebase();
 const { initializeApp } = firebaseApp;
 const { getDatabase, ref, get, onValue, update, remove, push, set, runTransaction } = firebaseDatabase;
-const { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } = firebaseAuth;
+const { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } = firebaseAuth;
 const { getStorage, ref: storageRef, uploadBytes, getDownloadURL } = firebaseStorage;
 const { firebaseConfig, ADMIN_EMAILS, USER_EMAILS } = window.INVENTARIO_CONFIG;
 
@@ -10,6 +10,9 @@ const { firebaseConfig, ADMIN_EMAILS, USER_EMAILS } = window.INVENTARIO_CONFIG;
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+await setPersistence(auth, browserLocalPersistence).catch(error => {
+  console.warn('No se pudo guardar la sesión en este navegador:', error);
+});
 const storage = getStorage(app);
 document.documentElement.dataset.inventarioJs = 'ready';
 const productosRef = ref(db, "productos");
@@ -69,7 +72,8 @@ function construirProductoPublico(producto) {
     nombre: producto?.nombre || '',
     laura: Number(producto?.laura || 0),
     stock: Number(producto?.stock || 0),
-    imagen: producto?.imagen || ''
+    imagen: producto?.imagen || '',
+    porEncargo: producto?.porEncargo === true
   };
 }
 
@@ -85,6 +89,7 @@ async function syncTodosProductosPublicosDesdeProductos(productosObj) {
     updates['productos_publicos/' + id + '/laura'] = Number(producto?.laura || 0);
     updates['productos_publicos/' + id + '/stock'] = Number(producto?.stock || 0);
     updates['productos_publicos/' + id + '/imagen'] = producto?.imagen || '';
+    updates['productos_publicos/' + id + '/porEncargo'] = producto?.porEncargo === true;
   });
   await update(ref(db), updates);
 }
@@ -1278,6 +1283,7 @@ window.renderTablaSolo = () => {
     </div>
     <button class="producto-link" onclick="abrirFichaProducto('${id}')">
       ${escaparHtml(p.nombre || '')}
+      ${p.porEncargo === true ? '<span class="inventory-order-chip">Por encargo</span>' : ''}
     </button>
   </div>
 </td>
@@ -1613,7 +1619,9 @@ window.togglePassword = () => {
   const visible = input.type === 'text';
 
   input.type = visible ? 'password' : 'text';
-  btn.textContent = visible ? '👁️' : '🙈';
+  btn.textContent = visible ? 'Mostrar' : 'Ocultar';
+  btn.setAttribute('aria-label', visible ? 'Mostrar contraseña' : 'Ocultar contraseña');
+  btn.setAttribute('aria-pressed', String(!visible));
   btn.classList.toggle('visible', !visible);
 };
 
@@ -1678,6 +1686,12 @@ function checkUserRole() {
   }
 
   document.body.classList.add('auth-nav-visible');
+
+  const requestedPage = window.INVENTARIO_BOOT.requestedPrivatePage(userRole);
+  if (requestedPage) {
+    window.location.replace(requestedPage);
+    return;
+  }
 
   updateUI();
   toggleNuevoProducto();
@@ -2392,6 +2406,7 @@ console.log('Prueba guardado...')
       proximo: Math.max(0, Number(document.getElementById('proximo').value) || 0),
       yoel: Math.max(0, Number(document.getElementById('yoel').value) || 0),
       laura: Math.max(0, Number(document.getElementById('laura').value) || 0),
+      porEncargo: document.getElementById('porEncargo').checked,
       imagen: imagenActual,
       vendidos: editId ? Number(productos[editId]?.vendidos || 0) : 0,
       reservados: editId ? Number(productos[editId]?.reservados || 0) : 0,
@@ -2490,6 +2505,7 @@ window.editar = (id) => {
   document.getElementById('proximo').value = p.proximo || 0;
   document.getElementById('yoel').value = p.yoel || 0;
   document.getElementById('laura').value = p.laura || 0;
+  document.getElementById('porEncargo').checked = p.porEncargo === true;
   document.getElementById('fotoProducto').value = '';
   editId = id;
   document.getElementById('productFormTitle').textContent = 'Editar producto';
@@ -2984,6 +3000,7 @@ function limpiarFormulario(cerrarModal = true) {
   document.getElementById('proximo').value = '';
   document.getElementById('yoel').value = '';
   document.getElementById('laura').value = '';
+  document.getElementById('porEncargo').checked = false;
   document.getElementById('fotoProducto').value = '';
   editId = null;
   document.getElementById('productFormTitle').textContent = 'Nuevo producto';
