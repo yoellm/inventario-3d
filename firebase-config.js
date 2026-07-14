@@ -1,4 +1,7 @@
 window.INVENTARIO_CONFIG = Object.freeze({
+  // Rama pública del mismo inventario. Las reglas de Realtime Database
+  // permiten leer productos_publicos sin iniciar sesión.
+  publicCatalogDatabaseURL: 'https://savvy-nature-200119-default-rtdb.europe-west1.firebasedatabase.app',
   firebaseConfig: Object.freeze({
     apiKey: 'AIzaSyAB57gP3-puL3O6kIAaxihjnuEQBnOw_DM',
     authDomain: 'savvy-nature-200119.firebaseapp.com',

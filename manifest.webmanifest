@@ -3,17 +3,52 @@
   "short_name": "Mundo Azul",
   "description": "Stock, ventas, reservas y liquidaciones de Mundo Azul",
   "lang": "es",
+  "id": "./",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#f7f5fa",
   "theme_color": "#f7f5fa",
+  "categories": ["business", "productivity"],
   "icons": [
     {
-      "src": "app-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "app-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Inventario",
+      "short_name": "Inventario",
+      "url": "./index.html",
+      "icons": [{ "src": "app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Mis ventas",
+      "short_name": "Mis ventas",
+      "url": "./ventas-propias.html",
+      "icons": [{ "src": "app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Escáner QR",
+      "short_name": "Escáner",
+      "url": "./scanner.html",
+      "icons": [{ "src": "app-icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

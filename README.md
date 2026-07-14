@@ -39,6 +39,9 @@ Aplicación web para gestionar el stock cedido a la persona que realiza las vent
 - `database.rules.json`: reglas recomendadas para Firebase Realtime Database.
 - `storage.rules`: reglas recomendadas para imágenes en Firebase Storage.
 - `manifest.webmanifest` y `sw.js`: instalación como aplicación web.
+- `pwa-register.js`: botón de instalación, instrucciones para iPhone, control de actualizaciones y avisos de conexión.
+- `offline.html`: pantalla segura cuando la aplicación se abre sin conexión.
+- `app-icon-192.png`, `app-icon-512.png`, `app-icon-maskable-512.png` y `apple-touch-icon.png`: iconos para Android, iPhone y accesos directos.
 
 ## Seguridad
 
@@ -49,5 +52,11 @@ El catálogo de clientes usa únicamente la rama `productos_publicos`. Para abri
 No se deben realizar ventas sin conexión: la aplicación necesita confirmar cada transacción con Firebase para evitar vender dos veces la misma unidad.
 
 Los HTML pueden abrirse directamente desde la carpeta. La instalación PWA y su manifiesto solo se activan cuando la aplicación se sirve mediante HTTP/HTTPS.
+
+## Aplicación móvil instalable
+
+La web funciona como PWA cuando está publicada mediante HTTPS. En Android aparece el botón **Instalar aplicación** cuando el navegador confirma que puede instalarse. En iPhone el mismo botón explica cómo usar **Compartir → Añadir a pantalla de inicio**. Las actualizaciones nuevas muestran un aviso y solo recargan después de pulsar **Actualizar**, evitando interrumpir una operación en curso.
+
+La interfaz básica puede abrirse sin conexión, pero las ventas, reservas y cambios de stock requieren internet para confirmarse en Firebase.
 
 El resultado financiero mostrado es orientativo y anterior a impuestos. Las ventas se calculan a partir del historial disponible; por ello no conviene borrar los movimientos.

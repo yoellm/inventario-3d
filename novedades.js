@@ -247,6 +247,7 @@
     const novedadesApp = document.getElementById('novedadesApp');
     document.body.classList.toggle('es-admin', currentRole === 'admin');
     document.body.classList.toggle('es-user', currentRole === 'user');
+    document.body.classList.toggle('auth-nav-visible', !!currentRole);
     document.getElementById('borrarNovedadesBtn').classList.toggle('hidden', currentRole !== 'admin');
 
     if (!user || !currentRole) {

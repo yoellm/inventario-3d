@@ -20,6 +20,8 @@
   font-family: Roboto, "Segoe UI", Arial, sans-serif;
 }
 
+[hidden] { display: none !important; }
+
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; background: var(--bg); }
 body { min-height: 100vh; max-width: 100%; margin: 0; overflow-x: hidden; color: var(--text); background: var(--bg); font-family: inherit; }
@@ -103,6 +105,8 @@ button { cursor: pointer; }
 
 .catalog-status { display: flex; min-height: 220px; align-items: center; justify-content: center; gap: 12px; color: var(--muted); }
 .catalog-status.error { color: var(--danger); }
+.catalog-retry { min-height: 40px; padding: 0 18px; color: #fff; border: 0; border-radius: 999px; background: var(--primary); font: inherit; font-weight: 600; cursor: pointer; }
+.catalog-retry:hover { background: var(--primary-hover); }
 .catalog-spinner { width: 24px; height: 24px; border: 3px solid var(--outline); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 

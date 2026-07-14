@@ -225,6 +225,7 @@ function renderImagenPrivada(url){
 
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
+      document.body.classList.toggle('auth-nav-visible', !!user);
       document.body.classList.toggle('nav-user-limitado', !user || !ADMIN_EMAILS.includes(user.email || ''));
 
       const status = document.getElementById('scanStatus');

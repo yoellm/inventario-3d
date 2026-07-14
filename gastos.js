@@ -433,6 +433,7 @@
     onAuthStateChanged(auth, user => {
       const status = document.getElementById('financeStatus');
       if (!user || !ADMIN_EMAILS.includes(user.email || '')) {
+        document.body.classList.remove('auth-nav-visible');
         status.className = 'finance-loading error';
         status.textContent = 'Acceso reservado a administradores. Volviendo al inventario…';
         setTimeout(() => window.location.href = 'index.html', 1800);
@@ -441,6 +442,7 @@
 
       currentUser = user;
       document.body.classList.add('app-logeada');
+      document.body.classList.add('auth-nav-visible');
       status.classList.add('hidden');
       document.getElementById('financeApp').classList.remove('hidden');
       document.getElementById('fechaDesde').value = `${new Date().getFullYear()}-01-01`;

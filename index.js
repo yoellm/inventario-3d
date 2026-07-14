@@ -1547,6 +1547,7 @@ document.getElementById('scrollTopBtn').onclick = () => window.scrollTo({ top:0,
 onAuthStateChanged(auth, (user) => {
    const loginDiv = document.getElementById('loginDiv');
    const mainApp = document.getElementById('mainApp');
+   document.body.classList.remove('auth-nav-visible');
   
    console.log("¡EJECUTANDO checkUserRole!");
     if (user) {
@@ -1675,6 +1676,8 @@ function checkUserRole() {
     signOut(auth);
     return;
   }
+
+  document.body.classList.add('auth-nav-visible');
 
   updateUI();
   toggleNuevoProducto();

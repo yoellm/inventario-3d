@@ -381,6 +381,7 @@
   onAuthStateChanged(auth, user => {
     const status = document.getElementById('ventasPropiasStatus');
     if (!user || !ADMIN_EMAILS.includes(user.email || '')) {
+      document.body.classList.remove('auth-nav-visible');
       status.className = 'page-status error';
       status.textContent = 'Acceso reservado a administradores. Volviendo al inventario…';
       setTimeout(() => window.location.href = 'index.html', 1800);
@@ -388,6 +389,7 @@
     }
     currentUser = user;
     document.body.classList.add('es-admin');
+    document.body.classList.add('auth-nav-visible');
     status.classList.add('hidden');
     document.getElementById('ventasPropiasApp').classList.remove('hidden');
     startListeners();

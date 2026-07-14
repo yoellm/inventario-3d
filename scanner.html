@@ -2,8 +2,15 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f5fa">
   <title>Información del producto</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mundo Azul">
   <style>
     :root{
       --bg:#eef3ff;
@@ -617,6 +624,7 @@
   <script src="firebase-config.js" defer></script>
   <script src="app-bootstrap.js" defer></script>
   <script src="scanner.js" defer></script>
+  <script src="pwa-register.js" defer></script>
 
   <script src="https://unpkg.com/html5-qrcode" defer></script>
   <div id="fotoModal" class="foto-modal hidden" onclick="cerrarFotoGrande(event)">

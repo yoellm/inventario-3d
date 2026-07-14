@@ -163,6 +163,7 @@
     const stockApp = document.getElementById('stockApp');
     document.body.classList.toggle('es-admin', role === 'admin');
     document.body.classList.toggle('es-user', role === 'user');
+    document.body.classList.toggle('auth-nav-visible', !!role);
 
     if (!user || !role) {
       stockApp.classList.add('hidden');

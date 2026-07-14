@@ -67,11 +67,13 @@ window.irEditarProducto = irEditarProducto;
 onAuthStateChanged(auth, (user) => {
   const status = document.getElementById('status');
   if (!user || !ADMIN_EMAILS.includes(user.email)) {
+    document.body.classList.remove('auth-nav-visible');
     status.className = 'error';
     status.textContent = 'Solo el administrador puede ver esta página';
     setTimeout(() => window.location.href = 'index.html', 2000);
     return;
   }
+  document.body.classList.add('auth-nav-visible');
   status.className = 'admin';
   status.textContent = `Administrador · ${user.email} · Estadísticas actualizadas`;
   prepararFechas();

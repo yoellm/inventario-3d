@@ -470,11 +470,13 @@ if (['usuario-conectado','consulta-producto','venta','venta-desde-reserva','rese
       const status = document.getElementById('status');
 
       if (user && ADMIN_EMAILS.includes(user.email)) {
+        document.body.classList.add('auth-nav-visible');
         loginDiv.classList.add('hidden');
         mainApp.classList.remove('hidden');
         status.className = 'admin';
         status.innerHTML = `<strong>Administrador</strong><span>${user.email} · Movimientos actualizados</span>`;
       } else {
+        document.body.classList.remove('auth-nav-visible');
         mainApp.classList.add('hidden');
         loginDiv.classList.remove('hidden');
       }

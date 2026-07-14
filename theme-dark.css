@@ -62,6 +62,7 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .hidden { display: none !important; }
 body.nav-user-limitado .nav-admin-only { display: none !important; }
+body:not(.auth-nav-visible) > .app-nav { display: none !important; }
 
 .app-shell,
 .secondary-page > :not(.page-nav):not(#toastContainer):not(.modal-overlay):not(.finance-toast) {

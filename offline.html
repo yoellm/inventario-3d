@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f5fa">
+  <title>Sin conexión · Mundo Azul</title>
+  <link rel="icon" type="image/png" href="app-icon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <style>
+    :root { color-scheme: light; font-family: Roboto, "Segoe UI", Arial, sans-serif; }
+    * { box-sizing: border-box; }
+    body { display: grid; min-height: 100dvh; margin: 0; padding: 24px; place-items: center; color: #1d1b20; background: #f7f5fa; }
+    main { width: min(480px, 100%); padding: 32px; text-align: center; border: 1px solid #d6d0da; border-radius: 22px; background: #fff; box-shadow: 0 8px 28px rgba(29,27,32,.08); }
+    img { width: 92px; height: 92px; object-fit: contain; border-radius: 20px; }
+    h1 { margin: 22px 0 10px; font-size: 28px; font-weight: 600; }
+    p { margin: 0 auto 24px; color: #625f66; line-height: 1.55; }
+    .notice { margin-bottom: 22px; padding: 12px 14px; color: #684e00; border-radius: 12px; background: #fff1c2; font-size: 12px; }
+    .actions { display: grid; gap: 10px; }
+    button, a { display: inline-flex; min-height: 46px; padding: 0 18px; align-items: center; justify-content: center; border-radius: 999px; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+    button { color: #fff; border: 0; background: #6750a4; }
+    a { color: #6750a4; border: 1px solid #d6d0da; background: #fff; }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="app-icon-192.png" alt="Mundo Azul">
+    <h1>Estás sin conexión</h1>
+    <p>No se puede conectar con Mundo Azul en este momento. Cuando recuperes internet podrás volver a consultar el stock y registrar operaciones.</p>
+    <div class="notice">Por seguridad, las ventas y los cambios de stock necesitan conexión para confirmarse en Firebase.</div>
+    <div class="actions">
+      <button type="button" onclick="location.reload()">Volver a intentar</button>
+      <a href="index.html">Ir al inicio</a>
+    </div>
+  </main>
+</body>
+</html>

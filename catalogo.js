@@ -1,6 +1,8 @@
 (async function () {
-  const { firebaseConfig } = window.INVENTARIO_CONFIG;
-  const catalogUrl = `${firebaseConfig.databaseURL}/productos_publicos.json`;
+  const config = window.INVENTARIO_CONFIG || {};
+  const catalogDatabaseURL = config.publicCatalogDatabaseURL || config.firebaseConfig?.databaseURL;
+  if (!catalogDatabaseURL) throw new Error('Falta la configuración del catálogo público');
+  const catalogUrl = `${catalogDatabaseURL.replace(/\/$/, '')}/productos_publicos.json`;
 
   const money = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' });
   const state = { productos: [], filtro: 'todos', texto: '', orden: 'nombre-asc' };
@@ -146,7 +148,22 @@
     status.replaceChildren();
     const message = document.createElement('span');
     message.textContent = 'No se pudo cargar el catálogo. Comprueba tu conexión e inténtalo de nuevo.';
-    status.appendChild(message);
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.className = 'catalog-retry';
+    retry.textContent = 'Reintentar';
+    retry.addEventListener('click', () => {
+      status.classList.remove('error');
+      status.replaceChildren();
+      const spinner = document.createElement('div');
+      spinner.className = 'catalog-spinner';
+      spinner.setAttribute('aria-hidden', 'true');
+      const loading = document.createElement('span');
+      loading.textContent = 'Cargando productos…';
+      status.append(spinner, loading);
+      cargarProductos();
+    }, { once: true });
+    status.append(message, retry);
     resultCount.textContent = 'Catálogo no disponible';
     totalProductos.textContent = '—';
   }
@@ -158,6 +175,7 @@
       state.productos = transformarProductos(await response.json());
       liveIndicator.classList.remove('error');
       liveIndicator.lastChild.textContent = ' Disponibilidad actualizada';
+      status.classList.remove('error');
       render();
       primeraCarga = false;
     } catch (error) {
