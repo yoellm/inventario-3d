@@ -10,11 +10,18 @@ Aplicación web para gestionar el stock cedido a la persona que realiza las vent
 4. Cuando se entrega el dinero, el administrador pulsa **Cerrar liquidación**.
 5. La liquidación queda guardada y únicamente se ponen a cero los contadores de ventas del periodo. El stock, las reservas y el historial se conservan.
 6. En **Finanzas** se registran materiales, maquinaria, embalaje, mantenimiento y otros gastos. El panel calcula el resultado de Yoel restando esos gastos al importe de ventas que le corresponde.
+7. Si el administrador vende un artículo por su cuenta, lo registra en **Mis ventas**. Se descuenta el stock y se suma el ingreso a Finanzas, sin modificar la liquidación de la vendedora.
 
 ## Archivos principales
 
 - `index.html`: inventario, ventas, reservas y liquidaciones.
 - `index.js`: lógica del inventario, ventas, reservas y liquidaciones.
+- `catalogo.html`: catálogo público para clientes, accesible sin iniciar sesión.
+- `catalogo.js` y `catalogo.css`: carga de productos públicos, búsqueda, filtros, ordenación y diseño adaptable del catálogo.
+- `stock.html` y `stock.js`: consulta rápida del stock para usuarios autorizados, con búsqueda, filtros e impresión.
+- `novedades.html` y `novedades.js`: historial de entradas de stock agrupado por fecha.
+- `ventas-propias.html` y `ventas-propias.js`: registro privado de ventas del administrador, correcciones y actualización de stock.
+- `operations-modern.css`: diseño Material compartido por Stock, Novedades y Mis ventas.
 - `scanner.html`: consulta pública por QR y venta rápida para usuarios autenticados.
 - `scanner.js`: lógica del lector QR y operaciones rápidas.
 - `estadisticas.html`: informes históricos basados en movimientos.
@@ -36,6 +43,8 @@ Aplicación web para gestionar el stock cedido a la persona que realiza las vent
 ## Seguridad
 
 Las comprobaciones visuales del navegador no sustituyen las reglas de Firebase. Después de revisar los correos autorizados, las reglas incluidas deben publicarse en el proyecto `savvy-nature-200119` desde Firebase Console o Firebase CLI.
+
+El catálogo de clientes usa únicamente la rama `productos_publicos`. Para abrirlo sin iniciar sesión es imprescindible publicar la versión incluida de `database.rules.json`; la aplicación mantiene esa rama sincronizada al crear, editar, vender o reponer productos. La dirección pública termina en `/catalogo.html`.
 
 No se deben realizar ventas sin conexión: la aplicación necesita confirmar cada transacción con Firebase para evitar vender dos veces la misma unidad.
 

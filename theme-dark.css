@@ -61,6 +61,7 @@ textarea { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
 .hidden { display: none !important; }
+body.nav-user-limitado .nav-admin-only { display: none !important; }
 
 .app-shell,
 .secondary-page > :not(.page-nav):not(#toastContainer):not(.modal-overlay):not(.finance-toast) {
@@ -367,6 +368,22 @@ input[type="file"]::file-selector-button {
 .login-field { display: grid; gap: 6px; min-width: 0; }
 .login-field input { width: 100%; }
 .login-actions { margin-top: 22px; }
+.public-catalog-link {
+  display: inline-flex;
+  min-height: 42px;
+  padding: 0 18px;
+  align-items: center;
+  justify-content: center;
+  color: var(--md-primary, #6750a4);
+  border: 1px solid var(--md-outline, #79747e);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.public-catalog-link:hover { background: #f5f0ff; }
+.public-catalog-link:focus-visible { outline: 3px solid rgba(103,80,164,.24); outline-offset: 2px; }
 .input-pass-wrap { position: relative; display: block !important; width: 100% !important; max-width: none !important; }
 .input-pass-wrap input { padding-right: 92px !important; }
 .toggle-pass-btn {
@@ -1291,6 +1308,7 @@ tbody tr:hover td,
   html body.solo-user .inventory-card #tabla .operation-actions button { min-height: 40px !important; }
   html body.solo-user .inventory-card #tabla .product-main { width: 100%; }
 html body.solo-user .inventory-card #tabla .producto-link { max-width: none; font-size: 15px !important; }
+
 }
 
 /* One shared application header and navigation on every page. */
@@ -1370,4 +1388,75 @@ body > .app-nav a.active { color: var(--md-primary) !important; }
   }
   body > .app-nav::-webkit-scrollbar { display: none; }
   body > .app-nav a { min-width: auto !important; min-height: 44px !important; padding: 0 14px !important; white-space: nowrap; }
+}
+
+/* Compact mobile dashboard header. This must remain after the shared header rules. */
+@media (max-width: 760px) {
+  body > .app-header {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 8px 14px !important;
+  }
+
+  body > .app-nav {
+    width: 100% !important;
+    max-width: none !important;
+    margin-inline: 0 !important;
+    padding-inline: 4px !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity;
+  }
+
+  body > .app-nav a {
+    min-width: max-content !important;
+    padding-inline: 13px !important;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .app-shell { width: calc(100% - 16px) !important; }
+
+  #mainApp .totales-superiores {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    scroll-snap-type: none !important;
+  }
+
+  #mainApp .total-box-superior {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 96px !important;
+    padding: 13px !important;
+    scroll-snap-align: none !important;
+  }
+
+  #mainApp .total-box-superior:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  #mainApp .total-box-superior strong { margin-bottom: 7px !important; font-size: 11px !important; line-height: 1.25; }
+  #mainApp #totalesSuperiores .total-box-superior span { font-size: 22px !important; line-height: 1.05; }
+  #mainApp .total-box-superior small { margin-top: 6px; font-size: 10px; line-height: 1.25; }
+
+  #mainApp > #status,
+  #mainApp #status {
+    display: flex !important;
+    width: 100% !important;
+    padding: 12px 14px !important;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    overflow-wrap: anywhere;
+  }
+
+  #mainApp #status strong,
+  #mainApp #status span { display: block; width: 100%; }
+}
+
+@media (max-width: 380px) {
+  #mainApp .total-box-superior { padding: 12px 10px !important; }
+  #mainApp #totalesSuperiores .total-box-superior span { font-size: 20px !important; }
 }

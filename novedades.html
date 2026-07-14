@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f5fa">
+  <title>Novedades de stock · Mundo Azul</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="theme-dark.css">
+  <link rel="stylesheet" href="operations-modern.css">
+</head>
+<body class="secondary-page operations-page novedades-page">
+  <header class="app-header">
+    <img src="logo.png" class="logo-app" alt="Mundo Azul">
+    <div class="app-header-text">
+      <h2>Mundo Azul</h2>
+      <p class="hero-subtitle">Gestión de inventario y ventas</p>
+    </div>
+  </header>
+
+  <nav class="app-nav" aria-label="Navegación principal">
+    <a href="index.html">Inventario</a>
+    <a href="stock.html">Stock</a>
+    <a class="active" href="novedades.html">Novedades</a>
+    <a class="nav-admin-only" href="ventas-propias.html">Mis ventas</a>
+    <a class="nav-admin-only" href="estadisticas.html">Estadísticas</a>
+    <a class="nav-admin-only" href="logs.html">Movimientos</a>
+    <a class="nav-admin-only" href="gastos.html">Finanzas</a>
+    <a href="scanner.html">Escáner QR</a>
+  </nav>
+
+  <main class="operations-shell">
+    <section class="card operations-login" id="loginDiv">
+      <div class="section-head compact">
+        <div>
+          <h3>Iniciar sesión</h3>
+          <p>Accede para consultar las últimas entradas de stock.</p>
+        </div>
+      </div>
+      <div class="operations-login-grid">
+        <label>Email<input id="userEmail" type="email" placeholder="Email" autocomplete="username"></label>
+        <label>Contraseña<input id="userPass" type="password" placeholder="Contraseña" autocomplete="current-password"></label>
+      </div>
+      <div class="operations-actions">
+        <button type="button" onclick="login()">Entrar</button>
+        <button type="button" class="material-outlined" onclick="resetLogin()">Limpiar</button>
+      </div>
+      <div id="loginStatus" class="inline-status" aria-live="polite"></div>
+    </section>
+
+    <div id="novedadesApp" class="hidden">
+      <section class="card operations-intro">
+        <div>
+          <span class="operations-eyebrow">ENTRADAS DE STOCK</span>
+          <h1>Novedades</h1>
+          <p>Consulta qué productos han recibido unidades nuevas y cuándo se añadieron.</p>
+        </div>
+        <button type="button" class="material-outlined logout-action" onclick="logout()">Cerrar sesión</button>
+      </section>
+
+      <div id="status" class="page-status" role="status">Cargando novedades…</div>
+
+      <section class="operations-kpis novedades-kpis" aria-label="Resumen de novedades">
+        <article class="operations-kpi">
+          <span>Entradas encontradas</span>
+          <strong id="totalNovedades">0</strong>
+        </article>
+        <article class="operations-kpi primary">
+          <span>Unidades añadidas</span>
+          <strong id="totalUnidadesNuevas">0</strong>
+        </article>
+        <article class="operations-kpi">
+          <span>Productos diferentes</span>
+          <strong id="totalProductosNuevos">0</strong>
+        </article>
+      </section>
+
+      <section class="card operations-content-card">
+        <div class="operations-toolbar novedades-toolbar">
+          <label class="search-field">
+            <span>Buscar producto</span>
+            <input id="buscarNovedades" type="search" placeholder="Nombre del producto…" autocomplete="off">
+          </label>
+          <label><span>Desde</span><input id="novedadesDesde" type="date"></label>
+          <label><span>Hasta</span><input id="novedadesHasta" type="date"></label>
+          <button type="button" class="material-outlined" onclick="filtrarUltimosDias(7)">7 días</button>
+          <button type="button" class="material-outlined" onclick="filtrarNovedadesHoy()">Hoy</button>
+          <button type="button" class="material-outlined" onclick="limpiarNovedadesFiltros()">Todas</button>
+          <button type="button" onclick="imprimirNovedades()">Imprimir</button>
+          <button type="button" id="borrarNovedadesBtn" class="danger-tonal hidden" onclick="borrarTodasNovedades()">Borrar historial</button>
+        </div>
+
+        <div class="operations-result-line">
+          <span id="novedadesResultCount">0 entradas</span>
+          <span class="sync-indicator"><i></i> Datos en tiempo real</span>
+        </div>
+
+        <div id="novedadesContenido" class="novedades-list"></div>
+        <div id="novedadesEmpty" class="operations-empty hidden">
+          <h2>No hay novedades</h2>
+          <p>Las nuevas entradas aparecerán al pasar el stock próximo al stock disponible.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="firebase-config.js" defer></script>
+  <script src="app-bootstrap.js" defer></script>
+  <script src="novedades.js" defer></script>
+  <script src="pwa-register.js" defer></script>
+</body>
+</html>

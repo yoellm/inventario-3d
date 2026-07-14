@@ -89,6 +89,41 @@ async function syncTodosProductosPublicosDesdeProductos(productosObj) {
   await update(ref(db), updates);
 }
 
+function fechaLocalNovedad(timestamp = Date.now()) {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+async function registrarNovedadStock(id, producto, cantidad, stockAnterior, stockTotal) {
+  const unidades = Math.max(0, Number(cantidad || 0));
+  if (!id || unidades <= 0) return;
+  try {
+    const timestamp = Date.now();
+    const novedadRef = push(ref(db, `productos/${id}/historialNovedades`));
+    const data = {
+      productoId: id,
+      productoNombre: producto?.nombre || 'Producto',
+      imagen: producto?.imagen || '',
+      cantidadAnadida: unidades,
+      stockAnterior: Math.max(0, Number(stockAnterior || 0)),
+      stockTotal: Math.max(0, Number(stockTotal || 0)),
+      timestamp,
+      fechaDia: fechaLocalNovedad(timestamp),
+      usuario: currentUser?.email || ''
+    };
+    await set(novedadRef, data);
+    if (productos[id]) {
+      productos[id].historialNovedades = productos[id].historialNovedades || {};
+      productos[id].historialNovedades[novedadRef.key] = data;
+    }
+  } catch (error) {
+    console.warn('El stock se actualizó, pero no se pudo registrar la novedad:', error);
+  }
+}
+
 function estaEnAppMovil() {
   return !!(window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function');
 }
@@ -1054,11 +1089,13 @@ window.anadirProximoStock = async (id) => {
   const cantidad = Number(inputProx?.value) || 0;
   if (cantidad <= 0) return showToast('✖ Cantidad inválida', 'error');
 
-  const nuevoStock = Number(p.stock || 0) + cantidad;
+  const stockAnterior = Number(p.stock || 0);
+  const nuevoStock = stockAnterior + cantidad;
   await update(ref(db,'productos/'+id), { stock:nuevoStock, proximo:0, emailAgotadoEnviado:false });
   productos[id].stock = nuevoStock;
   productos[id].proximo = 0;
   productos[id].emailAgotadoEnviado = false;
+  await registrarNovedadStock(id, productos[id], cantidad, stockAnterior, nuevoStock);
   await syncProductoPublico(id, productos[id]);
 
   if (inputProx) {
@@ -2313,12 +2350,16 @@ window.modificarStock = (id) => {
     onConfirm: async (values) => {
       const stock = Math.max(0, Number(values.stock));
       if (isNaN(stock)) return showToast('✖ Stock inválido', 'error');
+      const stockAnterior = Math.max(0, Number(productos[id]?.stock || 0));
       const updates = { stock };
       if (stock > 0 && productos[id]?.emailAgotadoEnviado) {
         updates.emailAgotadoEnviado = false;
       }
       await update(ref(db,'productos/'+id), updates);
       productos[id] = { ...productos[id], ...updates };
+      if (stock > stockAnterior) {
+        await registrarNovedadStock(id, productos[id], stock - stockAnterior, stockAnterior, stock);
+      }
       await syncProductoPublico(id, productos[id]);
       await guardarLog('stock-modificado', id, productos[id].nombre, stock, currentUser.email);
       showToast(`✅ Stock actualizado: ${stock}`, 'success');
@@ -2355,13 +2396,18 @@ console.log('Prueba guardado...')
       vLaura: editId ? Number(productos[editId]?.vLaura || 0) : 0,
       reservasDetalle: editId ? (Array.isArray(productos[editId]?.reservasDetalle) ? productos[editId].reservasDetalle : []) : [],
       emailAgotadoEnviado: editId ? !!productos[editId]?.emailAgotadoEnviado : false,
-      ocultoIndex: editId ? !!productos[editId]?.ocultoIndex : false
+      ocultoIndex: editId ? !!productos[editId]?.ocultoIndex : false,
+      historialNovedades: editId ? (productos[editId]?.historialNovedades || {}) : {}
     };
 
 console.log('Probamos a guardar')
     if (editId) {
+      const stockAnterior = Math.max(0, Number(productos[editId]?.stock || 0));
       await update(ref(db,'productos/'+editId), data);
       productos[editId] = data;
+      if (data.stock > stockAnterior) {
+        await registrarNovedadStock(editId, data, data.stock - stockAnterior, stockAnterior, data.stock);
+      }
       await syncProductoPublico(editId, data);
       await guardarLog('producto-editado', editId, nombre, 0, currentUser.email);
       limpiarFormulario();
@@ -2370,6 +2416,9 @@ console.log('Probamos a guardar')
 	  console.log(data)
       const newRef = await push(productosRef, data);
       productos[newRef.key] = data;
+      if (data.stock > 0) {
+        await registrarNovedadStock(newRef.key, data, data.stock, 0, data.stock);
+      }
       await syncProductoPublico(newRef.key, data);
       await guardarLog('producto-creado', newRef.key, nombre, 0, currentUser.email);
       limpiarFormulario();

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f5fa">
+  <meta name="description" content="Catálogo público de productos 3D de Mundo Azul">
+  <title>Catálogo · Mundo Azul</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="catalogo.css">
+</head>
+<body>
+  <header class="catalog-header">
+    <a class="catalog-brand" href="catalogo.html" aria-label="Inicio del catálogo">
+      <img src="logo.png" alt="Mundo Azul">
+      <span>
+        <strong>Mundo Azul</strong>
+        <small>Catálogo de productos 3D</small>
+      </span>
+    </a>
+    <span class="public-badge">Catálogo público</span>
+  </header>
+
+  <main class="catalog-main">
+    <section class="catalog-hero">
+      <div>
+        <span class="eyebrow">MUNDO AZUL</span>
+        <h1>Descubre nuestros productos 3D</h1>
+        <p>Consulta los modelos disponibles, sus precios y encuentra tu próximo favorito.</p>
+      </div>
+      <div class="hero-summary" aria-live="polite">
+        <strong id="totalProductos">—</strong>
+        <span>productos en catálogo</span>
+      </div>
+    </section>
+
+    <section class="catalog-controls" aria-label="Buscar y ordenar productos">
+      <div class="catalog-search">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+        <input id="catalogSearch" type="search" placeholder="Buscar producto…" autocomplete="off">
+      </div>
+
+      <div class="availability-tabs" role="group" aria-label="Filtrar por disponibilidad">
+        <button type="button" class="active" data-filter="todos">Todos</button>
+        <button type="button" data-filter="disponibles">Disponibles</button>
+        <button type="button" data-filter="agotados">Agotados</button>
+      </div>
+
+      <label class="sort-control" for="catalogSort">
+        <span>Ordenar</span>
+        <select id="catalogSort">
+          <option value="nombre-asc">Nombre A → Z</option>
+          <option value="precio-asc">Precio: menor primero</option>
+          <option value="precio-desc">Precio: mayor primero</option>
+        </select>
+      </label>
+    </section>
+
+    <div class="catalog-result-line">
+      <span id="catalogResultCount">Preparando catálogo…</span>
+      <span class="live-indicator" id="catalogLiveIndicator"><i></i> Disponibilidad actualizada</span>
+    </div>
+
+    <div id="catalogStatus" class="catalog-status" role="status">
+      <div class="catalog-spinner" aria-hidden="true"></div>
+      <span>Cargando productos…</span>
+    </div>
+
+    <section id="catalogGrid" class="catalog-grid" aria-label="Productos"></section>
+
+    <section id="catalogEmpty" class="catalog-empty" hidden>
+      <div class="empty-icon">⌕</div>
+      <h2>No encontramos productos</h2>
+      <p>Prueba con otro nombre o cambia el filtro de disponibilidad.</p>
+      <button type="button" id="clearCatalogFilters">Limpiar filtros</button>
+    </section>
+  </main>
+
+  <footer class="catalog-footer">
+    <img src="logo.png" alt="">
+    <span>Mundo Azul · Productos 3D</span>
+  </footer>
+
+  <dialog id="catalogProductDialog" class="catalog-dialog">
+    <button type="button" class="dialog-close" id="closeCatalogDialog" aria-label="Cerrar">×</button>
+    <div class="dialog-media" id="dialogMedia"></div>
+    <div class="dialog-content">
+      <span id="dialogAvailability" class="availability-badge"></span>
+      <h2 id="dialogName">Producto</h2>
+      <div id="dialogPrice" class="dialog-price">0,00 €</div>
+      <p>Consulta la disponibilidad para realizar tu pedido.</p>
+      <button type="button" class="dialog-done" id="dialogDone">Seguir viendo</button>
+    </div>
+  </dialog>
+
+  <script src="firebase-config.js" defer></script>
+  <script src="catalogo.js" defer></script>
+  <script src="pwa-register.js" defer></script>
+</body>
+</html>

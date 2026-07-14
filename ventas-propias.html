@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f5fa">
+  <title>Mis ventas · Mundo Azul</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="theme-dark.css">
+  <link rel="stylesheet" href="operations-modern.css">
+</head>
+<body class="secondary-page operations-page direct-sales-page">
+  <header class="app-header">
+    <img src="logo.png" class="logo-app" alt="Mundo Azul">
+    <div class="app-header-text">
+      <h2>Mundo Azul</h2>
+      <p class="hero-subtitle">Gestión de inventario y ventas</p>
+    </div>
+  </header>
+
+  <nav class="app-nav" aria-label="Navegación principal">
+    <a href="index.html">Inventario</a>
+    <a href="stock.html">Stock</a>
+    <a href="novedades.html">Novedades</a>
+    <a class="active nav-admin-only" href="ventas-propias.html">Mis ventas</a>
+    <a class="nav-admin-only" href="estadisticas.html">Estadísticas</a>
+    <a class="nav-admin-only" href="logs.html">Movimientos</a>
+    <a class="nav-admin-only" href="gastos.html">Finanzas</a>
+    <a href="scanner.html">Escáner QR</a>
+  </nav>
+
+  <main class="operations-shell">
+    <div id="ventasPropiasStatus" class="page-status">Comprobando acceso…</div>
+
+    <div id="ventasPropiasApp" class="hidden">
+      <section class="card operations-intro">
+        <div>
+          <span class="operations-eyebrow">ÁREA PRIVADA</span>
+          <h1>Mis ventas</h1>
+          <p>Registra las ventas que haces tú. Descontarán stock sin afectar a la liquidación de la vendedora.</p>
+        </div>
+      </section>
+
+      <section class="operations-kpis direct-sales-kpis">
+        <article class="operations-kpi primary"><span>Ingresos propios</span><strong id="ventasPropiasIngresos">0,00 €</strong></article>
+        <article class="operations-kpi"><span>Unidades vendidas</span><strong id="ventasPropiasUnidades">0</strong></article>
+        <article class="operations-kpi"><span>Operaciones</span><strong id="ventasPropiasOperaciones">0</strong></article>
+      </section>
+
+      <div class="direct-sales-layout">
+        <section class="card operations-content-card direct-sale-form-card">
+          <div class="operations-section-head">
+            <span class="operations-eyebrow">NUEVA OPERACIÓN</span>
+            <h2>Registrar venta propia</h2>
+            <p>El importe cobrado se contabiliza íntegramente como ingreso tuyo.</p>
+          </div>
+
+          <div class="direct-sale-form">
+            <div class="product-picker span-2">
+              <input id="ventaPropiaProducto" type="hidden" value="">
+              <div class="product-picker-head">
+                <div>
+                  <h3>Selecciona el producto *</h3>
+                  <p>Pulsa sobre una ficha para añadirlo a la venta.</p>
+                </div>
+                <input id="buscarProductoVentaPropia" type="search" placeholder="Buscar por nombre…" autocomplete="off">
+              </div>
+              <div id="ventaPropiaProductosGrid" class="product-picker-grid" aria-live="polite"></div>
+              <div id="ventaPropiaProductosEmpty" class="product-picker-empty hidden">No hay productos que coincidan con la búsqueda.</div>
+            </div>
+            <div id="ventaPropiaStockInfo" class="product-stock-hint span-2">Selecciona un producto para consultar el stock.</div>
+            <label><span>Cantidad *</span><input id="ventaPropiaCantidad" type="number" min="1" step="1" value="1" inputmode="numeric"></label>
+            <label><span>Precio por unidad *</span><input id="ventaPropiaPrecio" type="number" min="0" step="0.01" placeholder="0,00" inputmode="decimal"></label>
+            <label><span>Fecha *</span><input id="ventaPropiaFecha" type="date"></label>
+            <label><span>Forma de cobro</span>
+              <select id="ventaPropiaMetodo">
+                <option value="efectivo">Efectivo</option>
+                <option value="bizum">Bizum</option>
+                <option value="tarjeta">Tarjeta</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="otro">Otro</option>
+              </select>
+            </label>
+            <label class="span-2"><span>Notas</span><input id="ventaPropiaNotas" maxlength="180" placeholder="Cliente, feria o cualquier detalle opcional"></label>
+          </div>
+
+          <div class="direct-sale-total">
+            <span>Total que cobrarás</span>
+            <strong id="ventaPropiaTotal">0,00 €</strong>
+          </div>
+          <button id="guardarVentaPropiaBtn" type="button" class="direct-sale-submit" onclick="registrarVentaPropia()">Registrar venta y descontar stock</button>
+        </section>
+
+        <section class="card operations-content-card direct-sales-help">
+          <span class="operations-eyebrow">SEPARACIÓN</span>
+          <h2>¿Qué modifica?</h2>
+          <ul>
+            <li>Descuenta el stock real del producto.</li>
+            <li>Actualiza la disponibilidad del catálogo.</li>
+            <li>Guarda el ingreso en tu historial privado.</li>
+            <li>No cambia el dinero pendiente de liquidar a la vendedora.</li>
+          </ul>
+        </section>
+      </div>
+
+      <section class="card operations-content-card direct-sales-history">
+        <div class="operations-section-head history-head">
+          <div>
+            <span class="operations-eyebrow">HISTORIAL PRIVADO</span>
+            <h2>Ventas registradas</h2>
+          </div>
+          <div class="direct-sales-filters">
+            <input id="buscarVentaPropia" type="search" placeholder="Buscar producto…">
+            <input id="ventasPropiasDesde" type="date" aria-label="Desde">
+            <input id="ventasPropiasHasta" type="date" aria-label="Hasta">
+            <button type="button" class="material-outlined" onclick="limpiarFiltrosVentasPropias()">Limpiar</button>
+          </div>
+        </div>
+
+        <div id="ventasPropiasTableWrap" class="operations-table-wrap hidden">
+          <table class="direct-sales-table">
+            <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Precio unidad</th><th>Total</th><th>Cobro</th><th>Estado</th><th>Acción</th></tr></thead>
+            <tbody id="ventasPropiasTabla"></tbody>
+          </table>
+        </div>
+        <div id="ventasPropiasEmpty" class="operations-empty"><h2>Todavía no hay ventas propias</h2><p>Las operaciones que registres aparecerán aquí.</p></div>
+      </section>
+    </div>
+  </main>
+
+  <div id="ventasPropiasToast" class="operations-toast" role="status"></div>
+  <script src="firebase-config.js" defer></script>
+  <script src="app-bootstrap.js" defer></script>
+  <script src="ventas-propias.js" defer></script>
+  <script src="pwa-register.js" defer></script>
+</body>
+</html>

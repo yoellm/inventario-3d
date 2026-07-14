@@ -10,21 +10,29 @@
     const auth = getAuth(app);
 
     const logsRef = ref(db, 'logs');
-    const productosRef = ref(db, 'productos');
 
     let todosLogs = [];
-    let todosProductos = {};
     let logsFiltradosActuales = [];
     let ordenActual = { campo: 'fecha', dir: 'desc' };
     let quickFilterActual = 'todos';
+    const TIPOS_VENTA = new Set(['venta', 'venta-desde-reserva', 'venta-propia', 'eliminacion-venta', 'eliminacion-venta-propia']);
+    const TIPOS_VENTA_POSITIVA = new Set(['venta', 'venta-desde-reserva', 'venta-propia']);
+    const TIPOS_CORRECCION_VENTA = new Set(['eliminacion-venta', 'eliminacion-venta-propia']);
+    const TIPOS_SIN_ENLACE_PRODUCTO = new Set([
+      'gasto-creado', 'gasto-editado', 'gasto-borrado',
+      'backup-creado', 'backup-restaurado',
+      'liquidacion-cerrada', 'reset-completo', 'usuario-conectado'
+    ]);
 
 function tipoClase(tipo){
   switch(tipo){
     case 'venta':
     case 'venta-desde-reserva': return ['tipo-venta','log-venta'];
+    case 'venta-propia': return ['tipo-venta','log-venta'];
     case 'reserva': return ['tipo-reserva','log-reserva'];
     case 'cancelacion-reserva': return ['tipo-cancel-reserva','log-cancelacion'];
-    case 'eliminacion-venta': return ['tipo-elim-venta','log-eliminacion'];
+    case 'eliminacion-venta':
+    case 'eliminacion-venta-propia': return ['tipo-elim-venta','log-eliminacion'];
     case 'usuario-conectado': return ['tipo-backup','log-tipico'];
     case 'consulta-producto': return ['tipo-stock','log-tipico'];
     case 'backup-creado':
@@ -48,6 +56,23 @@ function tipoClase(tipo){
 
     function safeLower(v){ return String(v || '').toLowerCase().trim(); }
 
+    function escaparHtml(valor = '') {
+      return String(valor)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function euro(valor) {
+      return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(valor || 0));
+    }
+
+    function numero(valor) {
+      return new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 }).format(Number(valor || 0));
+    }
+
     function extraerImportes(log){
       const detalles = String(log?.detalles || '');
       const beaDirect = Number(log?.precioyoel ?? log?.totalyoel ?? log?.precioBea ?? log?.totalBea ?? 0);
@@ -65,6 +90,54 @@ function tipoClase(tipo){
       return { bea, laura, margen };
     }
 
+    function ventaFirmada(log) {
+      if (!TIPOS_VENTA.has(log?.tipo)) return null;
+      const signo = TIPOS_CORRECCION_VENTA.has(log.tipo) ? -1 : 1;
+      return {
+        unidades: signo * Number(log.cantidad || 0),
+        paraYoel: signo * Number(log.beaCalc || 0),
+        cobrado: signo * Number(log.lauraCalc || 0),
+        margen: signo * Number(log.margenCalc || 0)
+      };
+    }
+
+    function describirMovimiento(log) {
+      const valor = Number(log?.cantidad || 0);
+      switch (log?.tipo) {
+        case 'venta':
+        case 'venta-desde-reserva':
+        case 'venta-propia':
+        case 'reserva':
+          return `${numero(valor)} ud${Math.abs(valor) === 1 ? '.' : 's.'}`;
+        case 'eliminacion-venta':
+        case 'eliminacion-venta-propia':
+        case 'cancelacion-reserva':
+          return `−${numero(Math.abs(valor))} ud${Math.abs(valor) === 1 ? '.' : 's.'}`;
+        case 'stock-anadido':
+          return `+${numero(valor)} ud${Math.abs(valor) === 1 ? '.' : 's.'}`;
+        case 'stock-modificado':
+          return `Stock final: ${numero(valor)}`;
+        case 'proximo-modificado':
+          return `Próximo: ${numero(valor)}`;
+        case 'precio-laura':
+        case 'precio-laura-global':
+          return `Nuevo precio: ${euro(valor)}`;
+        case 'gasto-creado':
+        case 'gasto-editado':
+        case 'gasto-borrado':
+          return `Gasto: ${euro(log.importeGasto || 0)}`;
+        case 'liquidacion-cerrada':
+        case 'reset-completo':
+          return valor ? `${numero(valor)} uds. liquidadas` : 'Cierre de periodo';
+        default:
+          return valor ? numero(valor) : '—';
+      }
+    }
+
+    function permiteEnlaceProducto(log) {
+      return !!log?.productoId && !TIPOS_SIN_ENLACE_PRODUCTO.has(log.tipo);
+    }
+
     function resumirDispositivo(userAgent){
       const ua = String(userAgent || '');
       const navegador = /Edg/i.test(ua) ? 'Edge' : /OPR|Opera/i.test(ua) ? 'Opera' : /Chrome/i.test(ua) ? 'Chrome' : /Firefox/i.test(ua) ? 'Firefox' : /Safari/i.test(ua) ? 'Safari' : 'Navegador';
@@ -79,9 +152,9 @@ function tipoClase(tipo){
       const ips = new Set();
 
       logs.forEach(log => {
-        if (log.tipo === 'eliminacion-venta') correcciones++;
+        if (['eliminacion-venta', 'eliminacion-venta-propia'].includes(log.tipo)) correcciones++;
         if (log.tipo === 'precio-laura' || log.tipo === 'precio-laura-global') cambiosPrecio++;
-        if (log.tipo === 'venta' && Number(log.cantidad || 0) >= 10) ventasGrandes++;
+        if (['venta', 'venta-desde-reserva', 'venta-propia'].includes(log.tipo) && Number(log.cantidad || 0) >= 10) ventasGrandes++;
         if (log.ip && log.ip !== 'IP desconocida') ips.add(log.ip);
       });
 
@@ -96,7 +169,7 @@ function tipoClase(tipo){
     function actualizarAlertas(logs){
       const alertas = detectarAlertas(logs);
       document.getElementById('alertasInteligentes').innerHTML = `
-        <div style="font-weight:bold;font-size:16px;margin-bottom:8px">🛡️ Alertas inteligentes</div>
+          <div style="font-weight:bold;font-size:16px;margin-bottom:8px">Alertas inteligentes</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <span class="mini-counter reset">Correcciones de venta: ${alertas.correcciones}</span>
           <span class="mini-counter backup">IPs distintas: ${alertas.ipsDistintas}</span>
@@ -106,20 +179,18 @@ function tipoClase(tipo){
       `;
     }
 
-    function actualizarTotalBea(){
-      let totalBea = 0;
-      Object.values(todosProductos || {}).forEach(p => {
-        totalBea += Number(p?.yoel ?? p?.bea ?? 0);
-      });
-      document.getElementById('totalBeaIndex').textContent = totalBea.toFixed(2) + ' €';
-    }
-
     function actualizarContadores(logs){
-      const totalCantidad = logs.reduce((acc, log) => acc + Number(log?.cantidad || 0), 0);
-      const totalLaura = logs.reduce((acc, log) => acc + Number(log?.lauraCalc || 0), 0);
-      const totalMargen = logs.reduce((acc, log) => acc + Number(log?.margenCalc || 0), 0);
+      const resumenVentas = logs.reduce((total, log) => {
+        const venta = ventaFirmada(log);
+        if (!venta) return total;
+        total.unidades += venta.unidades;
+        total.paraYoel += venta.paraYoel;
+        total.cobrado += venta.cobrado;
+        total.margen += venta.margen;
+        return total;
+      }, { unidades: 0, paraYoel: 0, cobrado: 0, margen: 0 });
 
-      const ventas = logs.filter(l => ['venta','venta-desde-reserva','eliminacion-venta'].includes(l.tipo)).length;
+      const ventas = logs.filter(l => TIPOS_VENTA_POSITIVA.has(l.tipo)).length;
       const reservas = logs.filter(l => l.tipo === 'reserva' || l.tipo === 'cancelacion-reserva').length;
       const stock = logs.filter(l => ['stock-anadido','stock-modificado','proximo-modificado'].includes(l.tipo)).length;
       const precios = logs.filter(l => ['precio-laura','precio-laura-global','producto-creado','producto-editado','producto-borrado'].includes(l.tipo)).length;
@@ -127,9 +198,10 @@ function tipoClase(tipo){
       const gastos = logs.filter(l => ['gasto-creado','gasto-editado','gasto-borrado'].includes(l.tipo)).length;
       const resets = logs.filter(l => ['liquidacion-cerrada','reset-completo'].includes(l.tipo)).length;
 
-      document.getElementById('totalCantidadLogs').textContent = totalCantidad.toLocaleString('es-ES');
-      document.getElementById('totalLauraLogs').textContent = totalLaura.toFixed(2) + ' €';
-      document.getElementById('totalMargenLogs').textContent = totalMargen.toFixed(2) + ' €';
+      document.getElementById('totalBeaIndex').textContent = euro(resumenVentas.paraYoel);
+      document.getElementById('totalCantidadLogs').textContent = numero(resumenVentas.unidades);
+      document.getElementById('totalLauraLogs').textContent = euro(resumenVentas.cobrado);
+      document.getElementById('totalMargenLogs').textContent = euro(resumenVentas.margen);
       document.getElementById('countVentas').textContent = ventas;
       document.getElementById('countReservas').textContent = reservas;
       document.getElementById('countStock').textContent = stock;
@@ -142,6 +214,7 @@ function tipoClase(tipo){
     function coincideQuickFilter(log){
       if (quickFilterActual === 'todos') return true;
       if (quickFilterActual === 'venta') return ['venta','venta-desde-reserva'].includes(log.tipo);
+      if (quickFilterActual === 'ventas-propias-group') return ['venta-propia','eliminacion-venta-propia'].includes(log.tipo);
       if (quickFilterActual === 'stock-group') return ['stock-anadido','stock-modificado','proximo-modificado'].includes(log.tipo);
       if (quickFilterActual === 'precio-group') return ['precio-laura','precio-laura-global','producto-creado','producto-editado','producto-borrado'].includes(log.tipo);
       if (quickFilterActual === 'backup-group') return ['backup-creado','backup-restaurado'].includes(log.tipo);
@@ -190,22 +263,24 @@ function tipoClase(tipo){
       let html = '';
       for (const log of logs){
         const [claseTipo, claseFila] = tipoClase(log.tipo || '');
-        const productoUrl = log.productoId ? `index.html?editId=${encodeURIComponent(log.productoId)}` : '';
+        const productoUrl = permiteEnlaceProducto(log) ? `index.html?editId=${encodeURIComponent(log.productoId)}` : '';
+        const venta = ventaFirmada(log);
+        const tipoTexto = `${String(log.tipo || '').replace(/-/g,' ').toUpperCase()}${log.anulada ? ' · CORREGIDA' : ''}`;
 
         html += `
           <tr class="${claseFila}">
-            <td>${log.fecha || ''}</td>
-            <td><span class="log-tipo ${claseTipo}">${String(log.tipo || '').replace(/-/g,' ').toUpperCase()}</span></td>
-            <td style="text-align:left">${log.productoNombre || ''}</td>
-            <td>${Number(log.cantidad || 0)}</td>
-            <td>${log.usuario || ''}</td>
-            <td class="money-bea">${log.beaCalc ? log.beaCalc.toFixed(2) + ' €' : '-'}</td>
-            <td class="money-laura">${log.lauraCalc ? log.lauraCalc.toFixed(2) + ' €' : '-'}</td>
-            <td class="money-margin">${log.lauraCalc || log.beaCalc ? log.margenCalc.toFixed(2) + ' €' : '-'}</td>
-            <td>${log.ip || '-'}</td>
-            <td>${log.dispositivoResumen || '-'}</td>
+            <td>${escaparHtml(log.fecha || '')}</td>
+            <td><span class="log-tipo ${claseTipo}">${escaparHtml(tipoTexto)}</span></td>
+            <td style="text-align:left">${escaparHtml(log.productoNombre || '')}</td>
+            <td class="movement-value">${escaparHtml(describirMovimiento(log))}</td>
+            <td>${escaparHtml(log.usuario || '')}</td>
+            <td class="money-bea">${venta ? euro(venta.paraYoel) : '—'}</td>
+            <td class="money-laura">${venta ? euro(venta.cobrado) : '—'}</td>
+            <td class="money-margin">${venta ? euro(venta.margen) : '—'}</td>
+            <td>${escaparHtml(log.ip || '—')}</td>
+            <td>${escaparHtml(log.dispositivoResumen || '—')}</td>
             <td>${productoUrl ? `<button class="product-link-btn" onclick="verProducto('${productoUrl}')">🔍</button>` : '-'}</td>
-            <td style="text-align:left;font-size:11px">${log.detalles || ''}</td>
+            <td style="text-align:left;font-size:11px">${escaparHtml(log.detalles || '')}</td>
           </tr>
         `;
       }
@@ -222,7 +297,7 @@ function tipoClase(tipo){
     window.setQuickFilter = (tipo, btn) => {
       quickFilterActual = tipo;
       refrescarQuickButtons(btn);
-if (['usuario-conectado','consulta-producto','venta','venta-desde-reserva','reserva','cancelacion-reserva','eliminacion-venta','backup-creado','backup-restaurado','stock-anadido','stock-modificado','proximo-modificado','precio-laura','precio-laura-global','producto-creado','producto-editado','producto-borrado','gasto-creado','gasto-editado','gasto-borrado','liquidacion-cerrada','reset-completo','todos'].includes(tipo)) {
+if (['usuario-conectado','consulta-producto','venta','venta-desde-reserva','reserva','cancelacion-reserva','eliminacion-venta','venta-propia','eliminacion-venta-propia','backup-creado','backup-restaurado','stock-anadido','stock-modificado','proximo-modificado','precio-laura','precio-laura-global','producto-creado','producto-editado','producto-borrado','gasto-creado','gasto-editado','gasto-borrado','liquidacion-cerrada','reset-completo','todos'].includes(tipo)) {
         document.getElementById('logTipo').value = tipo === 'todos' ? 'todos' : tipo;
       } else {
         document.getElementById('logTipo').value = 'todos';
@@ -288,17 +363,18 @@ if (['usuario-conectado','consulta-producto','venta','venta-desde-reserva','rese
     };
 
     window.exportarCSV = () => {
-      const filas = [["Fecha","Tipo","Producto","Cantidad","Usuario","Bea","Laura","Margen","IP","Dispositivo","Detalles"]];
+      const filas = [["Fecha","Tipo","Producto o concepto","Movimiento","Usuario","Para Yoel","Cobrado","Ganancia vendedora","IP","Dispositivo","Detalles"]];
       logsFiltradosActuales.forEach(log => {
+        const venta = ventaFirmada(log);
         filas.push([
           log.fecha || '',
           log.tipo || '',
           log.productoNombre || '',
-          Number(log.cantidad || 0),
+          describirMovimiento(log),
           log.usuario || '',
-          log.beaCalc ? log.beaCalc.toFixed(2) : '',
-          log.lauraCalc ? log.lauraCalc.toFixed(2) : '',
-          log.lauraCalc || log.beaCalc ? log.margenCalc.toFixed(2) : '',
+          venta ? venta.paraYoel.toFixed(2) : '',
+          venta ? venta.cobrado.toFixed(2) : '',
+          venta ? venta.margen.toFixed(2) : '',
           log.ip || '',
           log.dispositivoResumen || '',
           log.detalles || ''
@@ -350,11 +426,6 @@ if (['usuario-conectado','consulta-producto','venta','venta-desde-reserva','rese
       }
     };
 
-    onValue(productosRef, (snap) => {
-      todosProductos = snap.val() || {};
-      actualizarTotalBea();
-    });
-
     onValue(logsRef, (snap) => {
       const nuevosLogs = [];
       snap.forEach(child => {
@@ -390,7 +461,7 @@ if (['usuario-conectado','consulta-producto','venta','venta-desde-reserva','rese
     }, (error) => {
       const status = document.getElementById('status');
       status.className = 'error';
-      status.textContent = '❌ Error cargando logs: ' + error.message;
+        status.textContent = 'Error cargando movimientos: ' + error.message;
     });
 
     onAuthStateChanged(auth, (user) => {
@@ -402,7 +473,7 @@ if (['usuario-conectado','consulta-producto','venta','venta-desde-reserva','rese
         loginDiv.classList.add('hidden');
         mainApp.classList.remove('hidden');
         status.className = 'admin';
-        status.innerHTML = `<strong>ADMIN</strong> ${user.email}<br>Logs cargados ✅`;
+        status.innerHTML = `<strong>Administrador</strong><span>${user.email} · Movimientos actualizados</span>`;
       } else {
         mainApp.classList.add('hidden');
         loginDiv.classList.remove('hidden');

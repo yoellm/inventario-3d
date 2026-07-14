@@ -6,8 +6,8 @@ const { getAuth, onAuthStateChanged } = firebaseAuth;
 const { firebaseConfig, ADMIN_EMAILS } = window.INVENTARIO_CONFIG;
 
 if (window.Chart) {
-  Chart.defaults.color = '#aeb8c5';
-  Chart.defaults.borderColor = '#2b3644';
+  Chart.defaults.color = '#49454f';
+  Chart.defaults.borderColor = '#e3dde6';
 }
 
 const app = initializeApp(firebaseConfig);
@@ -68,12 +68,12 @@ onAuthStateChanged(auth, (user) => {
   const status = document.getElementById('status');
   if (!user || !ADMIN_EMAILS.includes(user.email)) {
     status.className = 'error';
-    status.textContent = '❌ Solo el ADMIN puede ver esta página';
+    status.textContent = 'Solo el administrador puede ver esta página';
     setTimeout(() => window.location.href = 'index.html', 2000);
     return;
   }
   status.className = 'admin';
-  status.textContent = `👑 ADMIN: ${user.email} - Estadísticas completas cargadas ✅`;
+  status.textContent = `Administrador · ${user.email} · Estadísticas actualizadas`;
   prepararFechas();
   cargarDatos();
 });
@@ -92,7 +92,7 @@ function cargarDatos(){
   }, error => {
     const status = document.getElementById('status');
     status.className = 'error';
-    status.textContent = '❌ Error cargando productos: ' + error.message;
+    status.textContent = 'Error cargando productos: ' + error.message;
   });
 
   onValue(logsRef, snap => {
@@ -101,7 +101,7 @@ function cargarDatos(){
   }, error => {
     const status = document.getElementById('status');
     status.className = 'error';
-    status.textContent = '❌ Error cargando logs: ' + error.message;
+    status.textContent = 'Error cargando movimientos: ' + error.message;
   });
 }
 
@@ -308,7 +308,7 @@ function renderProductoDestacado(rows){
       </div>
 
       <div class="destacado-info">
-        <div class="destacado-titulo">🏆 Producto más vendido del filtro actual</div>
+        <div class="destacado-titulo">Producto más vendido del filtro actual</div>
         <div class="destacado-nombre">${top.nombre}</div>
 
         <div class="destacado-kpis">
@@ -335,8 +335,8 @@ function renderProductoDestacado(rows){
         </div>
 
         <div class="destacado-acciones">
-          <button class="orange" onclick="irEditarProducto('${top.id}')">✏️ Modificar producto</button>
-          <button onclick="window.scrollTo({top: document.getElementById('tablaEstadisticas').offsetTop - 120, behavior:'smooth'})">📋 Ver en ranking</button>
+          <button class="orange" onclick="irEditarProducto('${top.id}')">Modificar producto</button>
+          <button onclick="window.scrollTo({top: document.getElementById('tablaEstadisticas').offsetTop - 120, behavior:'smooth'})">Ver en ranking</button>
         </div>
       </div>
     </div>
@@ -429,7 +429,7 @@ function renderTablaPrincipal(rows){
   if (nextBtn) nextBtn.disabled = rankingPagina >= totalPaginas;
 
   if (!rankingPintar.length) {
-    tabla.innerHTML = '<tr><td colspan="12" class="empty">❌ No hay productos con ese filtro</td></tr>';
+    tabla.innerHTML = '<tr><td colspan="12" class="empty">No hay productos con ese filtro</td></tr>';
     return;
   }
 
@@ -456,7 +456,7 @@ function renderTablaPrincipal(rows){
         <td style="color:#007bff;font-weight:bold">${formatEuro(p.lauraTotal)}</td>
         <td style="color:#f59e0b;font-weight:bold">${p.porcentaje.toFixed(1)}%</td>
         <td>${estado}</td>
-        <td><button class="edit-btn" onclick="irEditarProducto('${p.id}')">✏️ Modificar</button></td>
+      <td><button class="edit-btn" onclick="irEditarProducto('${p.id}')">Modificar</button></td>
       </tr>
     `;
   }).join('');

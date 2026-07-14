@@ -3,7 +3,7 @@
     const { initializeApp } = firebaseApp;
     const { getDatabase, ref, get, update, push, runTransaction } = firebaseDatabase;
     const { getAuth, onAuthStateChanged } = firebaseAuth;
-    const { firebaseConfig } = window.INVENTARIO_CONFIG;
+    const { firebaseConfig, ADMIN_EMAILS } = window.INVENTARIO_CONFIG;
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
@@ -225,6 +225,7 @@ function renderImagenPrivada(url){
 
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
+      document.body.classList.toggle('nav-user-limitado', !user || !ADMIN_EMAILS.includes(user.email || ''));
 
       const status = document.getElementById('scanStatus');
       if (status) {

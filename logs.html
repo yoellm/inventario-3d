@@ -91,6 +91,7 @@
   </style>
   <link rel="stylesheet" href="pages-modern.css">
   <link rel="stylesheet" href="theme-dark.css">
+  <link rel="stylesheet" href="analytics-modern.css">
 </head>
 <body class="secondary-page logs-page">
   <header class="app-header">
@@ -103,27 +104,58 @@
 
   <nav class="app-nav" aria-label="Navegación principal">
     <a href="index.html">Inventario</a>
+    <a href="stock.html">Stock</a>
+    <a href="novedades.html">Novedades</a>
+    <a class="nav-admin-only" href="ventas-propias.html">Mis ventas</a>
     <a href="estadisticas.html">Estadísticas</a>
     <a class="active" href="logs.html">Movimientos</a>
     <a href="gastos.html">Finanzas</a>
     <a href="scanner.html">Escáner QR</a>
   </nav>
   <div class="card login-card" id="loginDiv">
-    <h3>Iniciar Sesión</h3>
-    <input id="userEmail" type="email" placeholder="Email" list="userList"><br>
-    <input id="userPass" type="password" placeholder="Contraseña"><br><br>
+    <div class="section-head compact">
+      <div>
+        <h3>Iniciar sesión</h3>
+        <p>Accede como administrador para consultar el historial de operaciones.</p>
+      </div>
+    </div>
+    <div class="login-grid">
+      <div class="login-field">
+        <label for="userEmail">Email</label>
+        <input id="userEmail" type="email" placeholder="Email" list="userList" autocomplete="username">
+      </div>
+      <div class="login-field">
+        <label for="userPass">Contraseña</label>
+        <input id="userPass" type="password" placeholder="Contraseña" autocomplete="current-password">
+      </div>
+    </div>
     <datalist id="userList">
       <option value="yoelmejias@outlook.es">ADMIN</option>
     </datalist>
-    <button onclick="login()">Entrar</button>
-    <button class="red" onclick="resetLogin()">Limpiar</button>
+    <div class="login-actions">
+      <button onclick="login()">Entrar</button>
+      <button class="gray" onclick="resetLogin()">Limpiar</button>
+    </div>
   </div>
 
   <div id="mainApp" class="hidden">
+    <section class="card page-intro logs-intro">
+      <div class="page-intro-copy">
+        <span class="page-eyebrow">AUDITORÍA</span>
+        <h1>Movimientos</h1>
+        <p>Consulta ventas, reservas, cambios de stock y operaciones administrativas.</p>
+      </div>
+      <button class="red page-logout" onclick="logout()">Cerrar sesión</button>
+    </section>
     <div id="status">Cargando...</div>
 
-    <div class="card">
-      <h2>📋 HISTORIAL COMPLETO DE MOVIMIENTOS</h2>
+    <div class="card movements-card">
+      <div class="section-head movements-head">
+        <div>
+          <h2>Historial de movimientos</h2>
+          <p>Filtra el registro y pulsa las cabeceras de la tabla para ordenar.</p>
+        </div>
+      </div>
 
       <div class="toolbar">
         <input id="logBuscar" placeholder="Buscar producto/usuario/detalles..." oninput="aplicarFiltros()">
@@ -135,9 +167,11 @@
 		  <option value="usuario-conectado">Usuarios conectados</option>
 <option value="consulta-producto">Consultas de producto</option>
           <option value="venta">Solo VENTAS</option>
+          <option value="venta-propia">Solo VENTAS PROPIAS</option>
           <option value="reserva">Solo RESERVAS</option>
           <option value="cancelacion-reserva">Solo CANCEL. RESERVA</option>
           <option value="eliminacion-venta">Solo ELIMINACIÓN VENTA</option>
+          <option value="eliminacion-venta-propia">Correcciones de venta propia</option>
           <option value="backup-creado">Backups creados</option>
           <option value="backup-restaurado">Backups restaurados</option>
           <option value="stock-anadido">Stock añadido</option>
@@ -158,9 +192,7 @@
         <button onclick="recargarRangoRapido(7)">7 días</button>
         <button onclick="recargarRangoRapido(30)">30 días</button>
         <button class="gray" onclick="limpiarFiltros()">Limpiar filtros</button>
-        <button class="green" onclick="exportarCSV()">⬇️ CSV</button>
-        <div style="flex:1"></div>
-        <button class="red" onclick="logout()">Cerrar Sesión</button>
+        <button class="green" onclick="exportarCSV()">Exportar CSV</button>
       </div>
 
       <div class="quick-filters">
@@ -168,6 +200,7 @@
   <button class="gray" onclick="setQuickFilter('usuario-conectado', this)">Conexiones</button>
   <button class="cyan" onclick="setQuickFilter('consulta-producto', this)">Consultas</button>
   <button class="green" onclick="setQuickFilter('venta', this)">Ventas</button>
+  <button class="green" onclick="setQuickFilter('ventas-propias-group', this)">Mis ventas</button>
   <button class="cyan" onclick="setQuickFilter('reserva', this)">Reservas</button>
   <button class="orange" onclick="setQuickFilter('stock-group', this)">Stock</button>
   <button class="purple" onclick="setQuickFilter('precio-group', this)">Precios</button>
@@ -178,37 +211,48 @@
 
       <div id="alertasInteligentes" class="card" style="margin-bottom:15px;background:#fff7ed;border:2px solid #fdba74;padding:14px"></div>
 
+      <div class="sales-summary-head">
+        <div>
+          <h3>Resumen de ventas del filtro</h3>
+          <p>Solo contabiliza ventas y correcciones visibles con los filtros actuales.</p>
+        </div>
+      </div>
+
       <div class="totales-logs">
         <div class="total-box total-bea">
-          <div>💰 IMPORTE UNITARIO YOEL</div>
-          <div id="totalBeaIndex" style="font-size:24px">0.00 €</div>
+          <div>Ingresos para Yoel</div>
+          <div class="movement-total-value" id="totalBeaIndex">0,00 €</div>
+          <small>Ventas cedidas y propias</small>
         </div>
         <div class="total-box total-cant">
-          <div>📦 CANTIDAD FILTRADA</div>
-          <div id="totalCantidadLogs" style="font-size:24px">0</div>
+          <div>Unidades vendidas netas</div>
+          <div class="movement-total-value" id="totalCantidadLogs">0</div>
+          <small>Restando correcciones</small>
         </div>
         <div class="total-box total-laura">
-          <div>💰 LAURA FILTRADO</div>
-          <div id="totalLauraLogs" style="font-size:24px">0.00 €</div>
+          <div>Total cobrado</div>
+          <div class="movement-total-value" id="totalLauraLogs">0,00 €</div>
+          <small>Importe pagado por clientes</small>
         </div>
         <div class="total-box total-margen">
-          <div>📊 MARGEN FILTRADO</div>
-          <div id="totalMargenLogs" style="font-size:24px">0.00 €</div>
+          <div>Ganancia vendedora</div>
+          <div class="movement-total-value" id="totalMargenLogs">0,00 €</div>
+          <small>Cobrado menos Yoel</small>
         </div>
       </div>
 
       <div class="counters">
-        <div class="mini-counter venta">Ventas: <span id="countVentas">0</span></div>
-        <div class="mini-counter reserva">Reservas: <span id="countReservas">0</span></div>
-        <div class="mini-counter stock">Stock: <span id="countStock">0</span></div>
-        <div class="mini-counter precio">Precios: <span id="countPrecios">0</span></div>
+        <div class="mini-counter venta">Registros de venta: <span id="countVentas">0</span></div>
+        <div class="mini-counter reserva">Mov. de reserva: <span id="countReservas">0</span></div>
+        <div class="mini-counter stock">Cambios de stock: <span id="countStock">0</span></div>
+        <div class="mini-counter precio">Cambios de precio/producto: <span id="countPrecios">0</span></div>
         <div class="mini-counter backup">Backups: <span id="countBackups">0</span></div>
-        <div class="mini-counter precio">Gastos: <span id="countGastos">0</span></div>
-        <div class="mini-counter reset">Liquidaciones: <span id="countResets">0</span></div>
+        <div class="mini-counter precio">Mov. de gastos: <span id="countGastos">0</span></div>
+        <div class="mini-counter reset">Cierres: <span id="countResets">0</span></div>
       </div>
 
       <div id="logCount">0 movimientos encontrados</div>
-      <div class="small-note">Pulsa en las cabeceras para ordenar. En ventas se calcula el importe para Yoel, el total cobrado y la ganancia.</div>
+      <div class="small-note">La columna “Movimiento” muestra unidades, nuevo precio, stock final o gasto según el tipo. Las columnas económicas solo se rellenan en ventas y correcciones.</div>
 
       <div class="tabla-wrap">
         <table class="log-table">
@@ -216,8 +260,8 @@
             <tr>
               <th onclick="ordenarPor('fecha')">Fecha ⬍</th>
               <th onclick="ordenarPor('tipo')">Tipo ⬍</th>
-              <th onclick="ordenarPor('producto')">Producto ⬍</th>
-              <th onclick="ordenarPor('cantidad')">Cant. ⬍</th>
+              <th onclick="ordenarPor('producto')">Producto / concepto ⬍</th>
+              <th onclick="ordenarPor('cantidad')">Movimiento ⬍</th>
               <th onclick="ordenarPor('usuario')">Usuario ⬍</th>
               <th onclick="ordenarPor('bea')">Yoel ⬍</th>
               <th onclick="ordenarPor('laura')">Cobrado ⬍</th>

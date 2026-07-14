@@ -103,10 +103,10 @@
       const resultado = { unidades: 0, paraYoel: 0, cobrado: 0 };
 
       Object.values(logs || {}).forEach(log => {
-        if (!['venta', 'venta-desde-reserva', 'eliminacion-venta'].includes(log?.tipo)) return;
+        if (!['venta', 'venta-desde-reserva', 'eliminacion-venta', 'venta-propia', 'eliminacion-venta-propia'].includes(log?.tipo)) return;
         if (!dentroPeriodo(fechaLog(log), desde, hasta)) return;
         const importes = importeVenta(log);
-        const signo = log.tipo === 'eliminacion-venta' ? -1 : 1;
+        const signo = ['eliminacion-venta', 'eliminacion-venta-propia'].includes(log.tipo) ? -1 : 1;
         resultado.unidades += signo * importes.cantidad;
         resultado.paraYoel += signo * importes.paraYoel;
         resultado.cobrado += signo * importes.cobrado;
@@ -188,12 +188,12 @@
       const meses = {};
 
       Object.values(logs || {}).forEach(log => {
-        if (!['venta', 'venta-desde-reserva', 'eliminacion-venta'].includes(log?.tipo)) return;
+        if (!['venta', 'venta-desde-reserva', 'eliminacion-venta', 'venta-propia', 'eliminacion-venta-propia'].includes(log?.tipo)) return;
         const fecha = fechaLog(log);
         if (!dentroPeriodo(fecha, desde, hasta)) return;
         const mes = fecha.slice(0, 7);
         const importe = importeVenta(log);
-        const signo = log.tipo === 'eliminacion-venta' ? -1 : 1;
+        const signo = ['eliminacion-venta', 'eliminacion-venta-propia'].includes(log.tipo) ? -1 : 1;
         if (!meses[mes]) meses[mes] = { ingresos: 0, gastos: 0 };
         meses[mes].ingresos += signo * importe.paraYoel;
       });

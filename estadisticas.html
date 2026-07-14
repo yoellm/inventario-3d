@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📊 Estadísticas · Mundo Azul</title>
+<title>Estadísticas · Mundo Azul</title>
 <link rel="icon" type="image/png" href="logo.png">
 
 <style>
@@ -455,6 +455,7 @@ canvas{width:100% !important;max-height:390px !important}
 </style>
 <link rel="stylesheet" href="pages-modern.css">
 <link rel="stylesheet" href="theme-dark.css">
+<link rel="stylesheet" href="analytics-modern.css">
 
 </head>
 <body class="secondary-page stats-page">
@@ -468,19 +469,25 @@ canvas{width:100% !important;max-height:390px !important}
 
 <nav class="app-nav" aria-label="Navegación principal">
   <a href="index.html">Inventario</a>
+  <a href="stock.html">Stock</a>
+  <a href="novedades.html">Novedades</a>
+  <a class="nav-admin-only" href="ventas-propias.html">Mis ventas</a>
   <a class="active" href="estadisticas.html">Estadísticas</a>
   <a href="logs.html">Movimientos</a>
   <a href="gastos.html">Finanzas</a>
   <a href="scanner.html">Escáner QR</a>
 </nav>
 
-<div class="card" style="background:linear-gradient(135deg,#1d4ed8 0%, #2563eb 42%, #4f46e5 78%, #7c3aed 100%);color:#fff;box-shadow:0 28px 60px rgba(37,99,235,.24)">
-<h1 style="margin-bottom:10px;color:#fff">📊 Estadísticas · Mundo Azul</h1>
-<div style="color:rgba(255,255,255,.88);font-weight:700;margin-bottom:14px">Panel visual profesional con comparativas, tendencias mensuales y resumen anual.</div>
+<div class="card page-intro stats-intro">
+<div class="page-intro-copy">
+  <span class="page-eyebrow">ANÁLISIS</span>
+  <h1>Estadísticas</h1>
+  <p>Compara ventas, stock y resultados para conocer la evolución del negocio.</p>
+</div>
 <div id="status" class="admin">Cargando...</div>
 </div>
 
-<div class="card">
+<div class="card analytics-filter-card">
   <div class="toolbar">
     <div class="field">
       <label for="buscarProducto">Buscar producto</label>
@@ -525,52 +532,52 @@ canvas{width:100% !important;max-height:390px !important}
     </div>
     <div class="field">
       <label>&nbsp;</label>
-      <button class="secondary" onclick="limpiarFiltros()">🧹 Limpiar filtros</button>
+      <button class="secondary" onclick="limpiarFiltros()">Limpiar filtros</button>
     </div>
     <div class="field">
       <label>&nbsp;</label>
-      <button onclick="imprimir()">🖨️ Imprimir</button>
+      <button onclick="imprimir()">Imprimir</button>
     </div>
     <div class="field">
       <label>&nbsp;</label>
-      <button class="green" onclick="descargarCSV()">⬇️ CSV</button>
+      <button class="green" onclick="descargarCSV()">Exportar CSV</button>
     </div>
     <div class="field">
       <label>&nbsp;</label>
-      <button class="purple" onclick="descargarPDF()">⬇️ PDF</button>
+      <button class="purple" onclick="descargarPDF()">Exportar PDF</button>
     </div>
     <div class="field">
       <label>&nbsp;</label>
-      <button class="red" onclick="volver()">⬅️ Volver</button>
+      <button class="red" onclick="volver()">Volver</button>
     </div>
   </div>
   <div id="resumenFechas" style="margin-top:14px"></div>
 </div>
 
 <div class="card">
-  <h2>🌟 Producto destacado</h2>
+  <h2>Producto destacado</h2>
   <div id="productoDestacadoWrap"></div>
 </div>
 
 <div class="grid-top">
-  <div class="kpi green"><div class="label">💰 Para Yoel</div><div class="value" id="kpiyoel">€0.00</div></div>
-  <div class="kpi blue"><div class="label">💳 Total cobrado</div><div class="value" id="kpiLaura">€0.00</div></div>
-  <div class="kpi yellow"><div class="label">✨ Ganancia vendedora</div><div class="value" id="kpiDiferencia">€0.00</div></div>
-  <div class="kpi cyan"><div class="label">📦 Unidades vendidas</div><div class="value" id="kpiVendidos">0</div></div>
-  <div class="kpi purple"><div class="label">📦 Reservados</div><div class="value" id="kpiReservados">0</div></div>
-  <div class="kpi red"><div class="label">⛔ Productos agotados</div><div class="value" id="kpiAgotados">0</div></div>
-  <div class="kpi orange"><div class="label">⚠️ Stock bajo</div><div class="value" id="kpiStockBajo">0</div></div>
-  <div class="kpi gray"><div class="label">📦 Stock actual total</div><div class="value" id="kpiStockActual">0</div></div>
+  <div class="kpi green"><div class="label">Para Yoel</div><div class="value" id="kpiyoel">€0.00</div></div>
+  <div class="kpi blue"><div class="label">Total cobrado</div><div class="value" id="kpiLaura">€0.00</div></div>
+  <div class="kpi yellow"><div class="label">Ganancia vendedora</div><div class="value" id="kpiDiferencia">€0.00</div></div>
+  <div class="kpi cyan"><div class="label">Unidades vendidas</div><div class="value" id="kpiVendidos">0</div></div>
+  <div class="kpi purple"><div class="label">Reservados</div><div class="value" id="kpiReservados">0</div></div>
+  <div class="kpi red"><div class="label">Productos agotados</div><div class="value" id="kpiAgotados">0</div></div>
+  <div class="kpi orange"><div class="label">Stock bajo</div><div class="value" id="kpiStockBajo">0</div></div>
+  <div class="kpi gray"><div class="label">Stock actual total</div><div class="value" id="kpiStockActual">0</div></div>
 </div>
 
 <div class="section-grid">
   <div>
     <div class="card">
-      <h2>🏆 Ranking completo de productos</h2>
+      <h2>Ranking completo de productos</h2>
 
       <div class="ranking-toolbar">
         <div class="ranking-toolbar-left">
-          <input id="buscarRanking" type="text" placeholder="🔍 Buscar en el ranking..." oninput="filtrarRankingEnVivo()">
+          <input id="buscarRanking" type="text" placeholder="Buscar en el ranking..." oninput="filtrarRankingEnVivo()">
           <button class="secondary" onclick="toggleVerTodosRanking()" id="btnVerTodosRanking">Ver todos</button>
         </div>
         <div class="ranking-toolbar-right" id="rankingResumenInfo">Mostrando 0 de 0 productos</div>
@@ -599,28 +606,28 @@ canvas{width:100% !important;max-height:390px !important}
       </div>
 
       <div class="ranking-pager">
-        <button class="secondary" onclick="irPaginaRanking(-1)" id="btnRankingPrev">⬅ Anterior</button>
+        <button class="secondary" onclick="irPaginaRanking(-1)" id="btnRankingPrev">Anterior</button>
         <div class="ranking-page-info" id="rankingPageInfo">Página 1 de 1</div>
-        <button onclick="irPaginaRanking(1)" id="btnRankingNext">Siguiente ➡</button>
+        <button onclick="irPaginaRanking(1)" id="btnRankingNext">Siguiente</button>
       </div>
     </div>
 
     <div class="card">
-      <h2>📈 Ventas por día (según logs filtrados)</h2>
+      <h2>Ventas por día</h2>
       <div class="chart-wrap">
         <canvas id="chartVentasPorDia"></canvas>
       </div>
     </div>
 
     <div class="card">
-      <h2>💸 Ingresos por día (según logs filtrados)</h2>
+      <h2>Ingresos por día</h2>
       <div class="chart-wrap">
         <canvas id="chartIngresosPorDia"></canvas>
       </div>
     </div>
 
     <div class="card">
-      <h2>🗓️ Evolución mensual</h2>
+      <h2>Evolución mensual</h2>
       <div class="chart-wrap">
         <canvas id="chartMeses"></canvas>
       </div>
@@ -628,7 +635,7 @@ canvas{width:100% !important;max-height:390px !important}
     </div>
 
     <div class="card">
-      <h2>📈 Ganancia vendedora por mes</h2>
+      <h2>Ganancia vendedora por mes</h2>
       <div class="chart-wrap">
         <canvas id="chartBeneficioMeses"></canvas>
       </div>
@@ -637,7 +644,7 @@ canvas{width:100% !important;max-height:390px !important}
 
   <div>
     <div class="card">
-      <h2>🥇 Top 10 más vendidos</h2>
+      <h2>Top 10 más vendidos</h2>
       <div class="tabla-container">
         <table class="mini-table">
           <thead>
@@ -649,7 +656,7 @@ canvas{width:100% !important;max-height:390px !important}
     </div>
 
     <div class="card">
-      <h2>⏳ Top 10 más reservados</h2>
+      <h2>Top 10 más reservados</h2>
       <div class="tabla-container">
         <table class="mini-table">
           <thead>
@@ -661,12 +668,12 @@ canvas{width:100% !important;max-height:390px !important}
     </div>
 
     <div class="card">
-      <h2>⚠️ Alertas útiles</h2>
+      <h2>Alertas de stock</h2>
       <div id="alertasWrap"></div>
     </div>
 
     <div class="card">
-      <h2>📅 Resumen por periodo (logs filtrados)</h2>
+      <h2>Resumen por periodo</h2>
       <div class="tabla-container">
         <table class="mini-table">
           <thead>
@@ -678,7 +685,7 @@ canvas{width:100% !important;max-height:390px !important}
     </div>
 
     <div class="card">
-      <h2>🏅 Ranking de meses</h2>
+      <h2>Ranking de meses</h2>
       <div class="tabla-container">
         <table class="mini-table">
           <thead>

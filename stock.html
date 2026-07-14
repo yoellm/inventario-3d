@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f5fa">
+  <title>Stock · Mundo Azul</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="theme-dark.css">
+  <link rel="stylesheet" href="operations-modern.css">
+</head>
+<body class="secondary-page operations-page stock-page">
+  <header class="app-header">
+    <img src="logo.png" class="logo-app" alt="Mundo Azul">
+    <div class="app-header-text">
+      <h2>Mundo Azul</h2>
+      <p class="hero-subtitle">Gestión de inventario y ventas</p>
+    </div>
+  </header>
+
+  <nav class="app-nav" aria-label="Navegación principal">
+    <a href="index.html">Inventario</a>
+    <a class="active" href="stock.html">Stock</a>
+    <a href="novedades.html">Novedades</a>
+    <a class="nav-admin-only" href="ventas-propias.html">Mis ventas</a>
+    <a class="nav-admin-only" href="estadisticas.html">Estadísticas</a>
+    <a class="nav-admin-only" href="logs.html">Movimientos</a>
+    <a class="nav-admin-only" href="gastos.html">Finanzas</a>
+    <a href="scanner.html">Escáner QR</a>
+  </nav>
+
+  <main class="operations-shell">
+    <section class="card operations-login" id="loginDiv">
+      <div class="section-head compact">
+        <div>
+          <h3>Iniciar sesión</h3>
+          <p>Accede para consultar el stock disponible.</p>
+        </div>
+      </div>
+      <div class="operations-login-grid">
+        <label>Email<input id="userEmail" type="email" placeholder="Email" autocomplete="username"></label>
+        <label>Contraseña<input id="userPass" type="password" placeholder="Contraseña" autocomplete="current-password"></label>
+      </div>
+      <div class="operations-actions">
+        <button type="button" onclick="login()">Entrar</button>
+        <button type="button" class="material-outlined" onclick="resetLogin()">Limpiar</button>
+      </div>
+      <div id="loginStatus" class="inline-status" aria-live="polite"></div>
+    </section>
+
+    <div id="stockApp" class="hidden">
+      <section class="card operations-intro">
+        <div>
+          <span class="operations-eyebrow">INVENTARIO</span>
+          <h1>Stock disponible</h1>
+          <p>Vista rápida de todas las unidades disponibles por producto.</p>
+        </div>
+        <button type="button" class="material-outlined logout-action" onclick="logout()">Cerrar sesión</button>
+      </section>
+
+      <div id="status" class="page-status" role="status">Cargando stock…</div>
+
+      <section class="operations-kpis" aria-label="Resumen de stock">
+        <article class="operations-kpi">
+          <span>Productos mostrados</span>
+          <strong id="totalProductos">0</strong>
+        </article>
+        <article class="operations-kpi primary">
+          <span>Unidades disponibles</span>
+          <strong id="totalStock">0</strong>
+        </article>
+        <article class="operations-kpi warning">
+          <span>Stock bajo</span>
+          <strong id="totalStockBajo">0</strong>
+        </article>
+        <article class="operations-kpi error">
+          <span>Agotados</span>
+          <strong id="totalAgotados">0</strong>
+        </article>
+      </section>
+
+      <section class="card operations-content-card">
+        <div class="operations-toolbar stock-toolbar">
+          <label class="search-field">
+            <span>Buscar producto</span>
+            <input id="buscarStock" type="search" placeholder="Nombre del producto…" autocomplete="off">
+          </label>
+          <label>
+            <span>Disponibilidad</span>
+            <select id="filtroStock">
+              <option value="todos">Todos</option>
+              <option value="disponibles">Con stock</option>
+              <option value="bajo">Stock bajo</option>
+              <option value="agotados">Agotados</option>
+            </select>
+          </label>
+          <label>
+            <span>Ordenar</span>
+            <select id="ordenStock">
+              <option value="nombre">Nombre A → Z</option>
+              <option value="stock-desc">Más stock primero</option>
+              <option value="stock-asc">Menos stock primero</option>
+            </select>
+          </label>
+          <button type="button" class="material-outlined" onclick="limpiarStockFiltros()">Limpiar</button>
+          <button type="button" onclick="imprimirStock()">Imprimir</button>
+        </div>
+
+        <div class="operations-result-line">
+          <span id="stockResultCount">0 productos</span>
+          <span class="sync-indicator"><i></i> Datos en tiempo real</span>
+        </div>
+
+        <div class="operations-table-wrap">
+          <table class="stock-table">
+            <thead><tr><th>Producto</th><th>Estado</th><th>Stock</th></tr></thead>
+            <tbody id="stockTabla"></tbody>
+          </table>
+        </div>
+        <div id="stockEmpty" class="operations-empty hidden">
+          <h2>No hay productos</h2>
+          <p>Prueba con otro término o cambia el filtro.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="firebase-config.js" defer></script>
+  <script src="app-bootstrap.js" defer></script>
+  <script src="stock.js" defer></script>
+  <script src="pwa-register.js" defer></script>
+</body>
+</html>
