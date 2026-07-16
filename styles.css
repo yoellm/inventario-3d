@@ -468,6 +468,15 @@ td button{
   margin-left:4px;
 }
 
+.own-sale-transfer-btn{
+  min-width:42px;
+  margin-left:4px;
+  padding:4px 8px !important;
+  background:linear-gradient(135deg,#2563eb,#4f46e5) !important;
+  color:#fff !important;
+  font-size:11px;
+}
+
 .reservar-btn,
 .btn-reservar{
   background:linear-gradient(135deg,#06b6d4,#0891b2) !important;
@@ -1244,7 +1253,8 @@ tbody td:nth-child(12){
   margin-bottom:6px;
 }
 
-.modal-field input{
+.modal-field input,
+.modal-field select{
   width:100%;
   padding:12px;
   font-size:15px;
@@ -2786,6 +2796,28 @@ body.bloqueo-precios-laura-activo{
 .liquidacion-ok{
   color:var(--success);
   font-weight:900;
+}
+
+.liquidacion-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.liquidacion-correction-btn{
+  min-width:max-content;
+  height:34px;
+  padding:5px 10px !important;
+  background:linear-gradient(135deg,#2563eb,#4f46e5) !important;
+  color:#fff !important;
+  font-size:11px;
+}
+
+.liquidacion-rectificada{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
 }
 
 @media (max-width:900px){

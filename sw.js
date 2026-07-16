@@ -1,5 +1,5 @@
 const CACHE_PREFIX = 'mundo-azul-';
-const CACHE_NAME = `${CACHE_PREFIX}shell-v27`;
+const CACHE_NAME = `${CACHE_PREFIX}shell-v30`;
 const APP_SHELL = [
   './',
   './index.html',

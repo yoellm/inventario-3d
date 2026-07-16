@@ -748,6 +748,7 @@ tbody tr:hover td,
 .reservar-btn,
 .qr-btn,
 .undo-btn,
+.own-sale-transfer-btn,
 .stock-edit-btn,
 .prox-btn,
 .prox-edit-btn,
@@ -786,6 +787,13 @@ tbody tr:hover td,
 .card-actions .section-head { flex: 1 0 100%; }
 .card-actions button { min-height: 40px; }
 .liquidaciones-head { align-items: center; }
+.liquidacion-correction-btn {
+  min-width: max-content !important;
+  color: var(--md-primary) !important;
+  border: 1px solid var(--md-outline-soft) !important;
+  border-radius: var(--md-pill) !important;
+  background: transparent !important;
+}
 .liquidacion-actual,
 .liquidaciones-empty,
 .ocultos-index-empty,
@@ -1245,6 +1253,7 @@ tbody tr:hover td,
 #mainApp #tabla .icon-btn-xs,
 #mainApp #tabla .qr-btn,
 #mainApp #tabla .undo-btn,
+#mainApp #tabla .own-sale-transfer-btn,
 #mainApp #tabla .stock-edit-btn,
 #mainApp #tabla .prox-btn,
 #mainApp #tabla .prox-edit-btn {
@@ -1256,6 +1265,15 @@ tbody tr:hover td,
   border-radius: 50% !important;
   background: var(--md-surface-2) !important;
   font-size: 12px !important;
+}
+
+#mainApp #tabla .own-sale-transfer-btn {
+  width: auto !important;
+  min-width: 42px !important;
+  padding-inline: 8px !important;
+  border-radius: 999px !important;
+  color: var(--md-on-primary) !important;
+  background: var(--md-primary) !important;
 }
 
 #mainApp #tabla .prox-group,

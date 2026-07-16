@@ -12,6 +12,8 @@ Aplicación web para gestionar el stock cedido a la persona que realiza las vent
 5. La liquidación queda guardada y únicamente se ponen a cero los contadores de ventas del periodo. El stock, las reservas y el historial se conservan.
 6. En **Finanzas** se registran materiales, maquinaria, embalaje, mantenimiento y otros gastos. El panel calcula el resultado de Yoel restando esos gastos al importe de ventas que le corresponde.
 7. Si el administrador vende un artículo por su cuenta, lo registra en **Mis ventas**. Se descuenta el stock y se suma el ingreso a Finanzas, sin modificar la liquidación de la vendedora.
+   Si una unidad se registró por error como venta de la vendedora, el botón **Mía** de la columna Vendidos permite traspasarla a **Mis ventas**. El traspaso mantiene el stock, descuenta esa unidad de la liquidación pendiente y conserva ambos movimientos en el historial.
+   Si la venta ya estaba incluida en una liquidación cerrada, se usa **Liquidaciones → Rectificar venta**. La liquidación histórica se recalcula y las unidades vuelven al stock. Si realmente era una venta propia, después se registra manualmente en **Mis ventas**, que volverá a descontar esas unidades.
 
 ## Archivos principales
 

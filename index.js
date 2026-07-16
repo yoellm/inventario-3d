@@ -830,10 +830,29 @@ window.openModal = ({ title, message = '', fields = [], confirmText = 'Guardar',
   for (const field of fields) {
     const wrap = document.createElement('div');
     wrap.className = 'modal-field';
-    wrap.innerHTML = `
-      <label for="modal-field-${field.name}">${field.label}</label>
-      <input id="modal-field-${field.name}" type="${field.type || 'text'}" value="${field.value ?? ''}" ${field.min !== undefined ? `min="${field.min}"` : ''} ${field.step !== undefined ? `step="${field.step}"` : ''}>
-    `;
+    const inputId = `modal-field-${field.name}`;
+    const label = document.createElement('label');
+    label.htmlFor = inputId;
+    label.textContent = field.label;
+    const input = field.type === 'select' ? document.createElement('select') : document.createElement('input');
+    input.id = inputId;
+    if (field.type === 'select') {
+      for (const optionData of field.options || []) {
+        const option = document.createElement('option');
+        option.value = optionData.value;
+        option.textContent = optionData.label;
+        option.selected = optionData.value === field.value;
+        input.appendChild(option);
+      }
+    } else {
+      input.type = field.type || 'text';
+      input.value = field.value ?? '';
+      if (field.min !== undefined) input.min = field.min;
+      if (field.max !== undefined) input.max = field.max;
+      if (field.step !== undefined) input.step = field.step;
+      if (field.maxLength !== undefined) input.maxLength = field.maxLength;
+    }
+    wrap.append(label, input);
     fieldsEl.appendChild(wrap);
   }
 
@@ -843,8 +862,8 @@ window.openModal = ({ title, message = '', fields = [], confirmText = 'Guardar',
     for (const field of fields) {
       values[field.name] = document.getElementById(`modal-field-${field.name}`).value;
     }
-    await onConfirm(values);
-    closeModal();
+    const shouldClose = await onConfirm(values);
+    if (shouldClose !== false) closeModal();
   };
 
   modal.onclick = (e) => {
@@ -1316,7 +1335,10 @@ window.renderTablaSolo = () => {
 
 <td class="vendidos">
   ${p.vendidos || 0}
-  ${(p.vendidos || 0) > 0 ? `<button class="undo-btn" onclick="eliminarUnaVenta('${id}')" title="Deshacer 1 venta" aria-label="Deshacer una venta">↶</button>` : ''}
+  ${(p.vendidos || 0) > 0 ? `
+    <button class="undo-btn" onclick="eliminarUnaVenta('${id}')" title="Deshacer 1 venta" aria-label="Deshacer una venta">↶</button>
+    ${userRole === 'admin' ? `<button class="own-sale-transfer-btn" onclick="pasarVentaAMisVentas('${id}')" title="Pasar 1 unidad a Mis ventas" aria-label="Pasar una venta a Mis ventas">Mía</button>` : ''}
+  ` : ''}
 </td>
 
 <td>${Number(p.yoel || 0).toFixed(2)}</td>
@@ -1412,6 +1434,130 @@ window.eliminarUnaVenta = async (id) => {
       );
 
       showToast(`✅ Eliminada 1 venta. Stock: ${nuevoStock}`, 'success');
+    }
+  });
+};
+
+window.pasarVentaAMisVentas = (id) => {
+  if (userRole !== 'admin') return showToast('Solo un administrador puede registrar ventas propias', 'error');
+  const p = productos[id];
+  if (!p || Number(p.vendidos || 0) <= 0) {
+    return showToast('No hay ventas pendientes para traspasar', 'error');
+  }
+
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  openModal({
+    title: 'Pasar a Mis ventas',
+    message: `Se traspasará 1 unidad de "${p.nombre}". Se quitará de la liquidación de la vendedora y se registrará como venta tuya sin modificar el stock.`,
+    confirmText: 'Traspasar venta',
+    fields: [
+      { name: 'precio', label: 'Tu precio de venta por unidad', type: 'number', value: Number(p.yoel || 0).toFixed(2), min: 0, step: '0.01' },
+      { name: 'fecha', label: 'Fecha de tu venta', type: 'date', value: today },
+      {
+        name: 'metodo',
+        label: 'Forma de cobro',
+        type: 'select',
+        value: 'efectivo',
+        options: [
+          { value: 'efectivo', label: 'Efectivo' },
+          { value: 'bizum', label: 'Bizum' },
+          { value: 'tarjeta', label: 'Tarjeta' },
+          { value: 'transferencia', label: 'Transferencia' },
+          { value: 'otro', label: 'Otro' }
+        ]
+      },
+      { name: 'notas', label: 'Notas (opcional)', type: 'text', value: '', maxLength: 180 }
+    ],
+    onConfirm: async ({ precio, fecha, metodo, notas }) => {
+      const precioPropio = Number(precio);
+      if (!Number.isFinite(precioPropio) || precioPropio < 0) {
+        showToast('Introduce un precio válido', 'error');
+        return false;
+      }
+      if (!fecha || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+        showToast('Selecciona la fecha de la venta', 'error');
+        return false;
+      }
+
+      const confirmBtn = document.getElementById('modalConfirmBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Traspasando…';
+      try {
+        const resultado = await runTransaction(ref(db, 'productos/' + id), (actual) => {
+          if (!actual || Number(actual.vendidos || 0) <= 0) return;
+          return {
+            ...actual,
+            vendidos: Number(actual.vendidos || 0) - 1,
+            vyoel: Math.max(0, Number(actual.vyoel || 0) - Number(actual.yoel || 0)),
+            vLaura: Math.max(0, Number(actual.vLaura || 0) - Number(actual.laura || 0))
+          };
+        });
+        if (!resultado.committed) {
+          showToast('La venta ya no está pendiente o el producto no existe', 'error');
+          return false;
+        }
+
+        const actualizado = resultado.snapshot.val() || {};
+        productos[id] = { ...(productos[id] || {}), ...actualizado };
+        const timestampVenta = new Date(`${fecha}T12:00:00`).getTime();
+        const timestampFinal = fecha === today ? Date.now() : timestampVenta;
+        const correccionRef = push(logsRef);
+        const ventaPropiaRef = push(logsRef);
+        const precioYoel = Number(actualizado.yoel || 0);
+        const precioLaura = Number(actualizado.laura || 0);
+        const usuario = currentUser?.email || '';
+        const changes = {};
+
+        changes[`logs/${correccionRef.key}`] = {
+          timestamp: Date.now(),
+          fecha: new Date().toLocaleString('es-ES'),
+          tipo: 'eliminacion-venta',
+          productoId: id,
+          productoNombre: actualizado.nombre || p.nombre || 'Producto',
+          productoImagen: actualizado.imagen || p.imagen || '',
+          cantidad: 1,
+          precioyoel: precioYoel,
+          precioLaura,
+          totalyoel: precioYoel,
+          totalLaura: precioLaura,
+          usuario,
+          ventaPropiaId: ventaPropiaRef.key,
+          detalles: 'Venta traspasada a Mis ventas; stock sin cambios'
+        };
+        changes[`logs/${ventaPropiaRef.key}`] = {
+          timestamp: timestampFinal,
+          fecha: new Date(timestampFinal).toLocaleString('es-ES'),
+          tipo: 'venta-propia',
+          productoId: id,
+          productoNombre: actualizado.nombre || p.nombre || 'Producto',
+          productoImagen: actualizado.imagen || p.imagen || '',
+          cantidad: 1,
+          precioVentaPropia: precioPropio,
+          precioyoel: precioPropio,
+          precioBaseProducto: precioYoel,
+          totalVentaPropia: precioPropio,
+          totalyoel: precioPropio,
+          totalCobrado: precioPropio,
+          metodoCobro: metodo,
+          usuario,
+          correccionInventarioId: correccionRef.key,
+          origenVentaInventario: true,
+          detalles: String(notas || '').trim() || 'Traspasada desde una venta del inventario'
+        };
+        await update(ref(db), changes);
+
+        programarRender();
+        showToast('Venta traspasada a Mis ventas. El stock no ha cambiado.', 'success', 3800);
+        return true;
+      } catch (error) {
+        console.error(error);
+        showToast('No se pudo completar el traspaso. Revisa la conexión e inténtalo de nuevo.', 'error', 4200);
+        return false;
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Traspasar venta';
+      }
     }
   });
 };
@@ -2622,6 +2768,7 @@ window.renderLiquidaciones = () => {
   tbody.innerHTML = items.slice(0, 30).map(item => {
     const fecha = new Date(Number(item.timestamp || Date.now())).toLocaleString('es-ES');
     const pagada = item.estado !== 'pendiente';
+    const rectificable = Object.values(item.detalleProductos || {}).some(detalle => Number(detalle?.unidades || 0) > 0);
     return `
       <tr>
         <td>${escaparHtml(fecha)}</td>
@@ -2630,10 +2777,18 @@ window.renderLiquidaciones = () => {
         <td><strong>${dinero(item.paraYoel)}</strong></td>
         <td>${dinero(item.gananciaVendedora)}</td>
         <td><span class="liquidacion-estado ${pagada ? 'pagada' : 'pendiente'}">${pagada ? 'Pagada' : 'Pendiente'}</span></td>
-        <td>${pagada
-          ? '<span class="liquidacion-ok">✓ Entregada</span>'
-          : `<button class="green" onclick="marcarLiquidacionPagada('${item.id}')">Marcar pagada</button>`
-        }</td>
+        <td>
+          <div class="liquidacion-actions">
+            ${pagada
+              ? '<span class="liquidacion-ok">✓ Entregada</span>'
+              : `<button class="green" onclick="marcarLiquidacionPagada('${item.id}')">Marcar pagada</button>`
+            }
+            ${rectificable
+              ? `<button class="liquidacion-correction-btn" onclick="rectificarVentaLiquidada('${item.id}')">Rectificar venta</button>`
+              : '<span class="liquidacion-rectificada">Sin ventas por rectificar</span>'
+            }
+          </div>
+        </td>
       </tr>
     `;
   }).join('');
@@ -2647,6 +2802,193 @@ window.marcarLiquidacionPagada = async (id) => {
     pagadaPor: currentUser?.email || ''
   });
   showToast('✅ Liquidación marcada como pagada', 'success');
+};
+
+window.rectificarVentaLiquidada = (id) => {
+  if (userRole !== 'admin') return showToast('Solo un administrador puede rectificar liquidaciones', 'error');
+  const liquidacion = liquidaciones[id];
+  if (!liquidacion) return showToast('No se ha encontrado la liquidación', 'error');
+
+  const productosLiquidacion = Object.entries(liquidacion.detalleProductos || {})
+    .map(([productoId, detalle]) => ({ productoId, ...(detalle || {}) }))
+    .filter(detalle => Number(detalle.unidades || 0) > 0)
+    .sort((a, b) => String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es', { sensitivity: 'base' }));
+  if (!productosLiquidacion.length) {
+    return showToast('Esta liquidación ya no contiene ventas que se puedan rectificar', 'info', 3500);
+  }
+
+  const fechaLiquidacion = new Date(Number(liquidacion.timestamp || Date.now()));
+  const fechaPorDefecto = `${fechaLiquidacion.getFullYear()}-${String(fechaLiquidacion.getMonth() + 1).padStart(2, '0')}-${String(fechaLiquidacion.getDate()).padStart(2, '0')}`;
+  const primero = productosLiquidacion[0];
+
+  openModal({
+    title: 'Rectificar venta ya liquidada',
+    message: 'La venta se quitará de esta liquidación y las unidades volverán al stock. Si era una venta tuya, podrás registrarla después manualmente en Mis ventas.',
+    confirmText: 'Rectificar venta',
+    fields: [
+      {
+        name: 'producto',
+        label: 'Producto liquidado',
+        type: 'select',
+        value: primero.productoId,
+        options: productosLiquidacion.map(detalle => ({
+          value: detalle.productoId,
+          label: `${detalle.nombre || 'Producto'} · ${Number(detalle.unidades || 0)} unidad${Number(detalle.unidades || 0) === 1 ? '' : 'es'}`
+        }))
+      },
+      { name: 'cantidad', label: 'Cantidad que quieres rectificar', type: 'number', value: 1, min: 1, max: Number(primero.unidades || 1), step: 1 },
+      { name: 'notas', label: 'Motivo de la rectificación (opcional)', type: 'text', value: '', maxLength: 180 }
+    ],
+    onConfirm: async ({ producto, cantidad, notas }) => {
+      const detalleSeleccionado = productosLiquidacion.find(detalle => detalle.productoId === producto);
+      const unidades = Number(cantidad);
+      if (!detalleSeleccionado) {
+        showToast('Selecciona un producto válido', 'error');
+        return false;
+      }
+      if (!Number.isInteger(unidades) || unidades <= 0 || unidades > Number(detalleSeleccionado.unidades || 0)) {
+        showToast('La cantidad no es válida para esta liquidación', 'error');
+        return false;
+      }
+      const confirmBtn = document.getElementById('modalConfirmBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Rectificando…';
+      const correccionRef = push(logsRef);
+      let importeYoelRetirado = 0;
+      let importeCobradoRetirado = 0;
+      const redondearDinero = valor => Math.round((Number(valor || 0) + Number.EPSILON) * 100) / 100;
+
+      try {
+        const resultado = await runTransaction(ref(db, `liquidaciones/${id}`), actual => {
+          const detalleActual = actual?.detalleProductos?.[producto];
+          const unidadesActuales = Number(detalleActual?.unidades || 0);
+          if (!actual || unidadesActuales < unidades || unidadesActuales <= 0) return;
+
+          const quitarDetalleCompleto = unidades === unidadesActuales;
+          importeYoelRetirado = quitarDetalleCompleto
+            ? Number(detalleActual.paraYoel || 0)
+            : redondearDinero(Number(detalleActual.paraYoel || 0) * unidades / unidadesActuales);
+          importeCobradoRetirado = quitarDetalleCompleto
+            ? Number(detalleActual.totalCobrado || 0)
+            : redondearDinero(Number(detalleActual.totalCobrado || 0) * unidades / unidadesActuales);
+
+          const detalleProductos = { ...(actual.detalleProductos || {}) };
+          if (quitarDetalleCompleto) {
+            delete detalleProductos[producto];
+          } else {
+            const nuevasUnidades = unidadesActuales - unidades;
+            const nuevoParaYoel = redondearDinero(Number(detalleActual.paraYoel || 0) - importeYoelRetirado);
+            const nuevoTotalCobrado = redondearDinero(Number(detalleActual.totalCobrado || 0) - importeCobradoRetirado);
+            detalleProductos[producto] = {
+              ...detalleActual,
+              unidades: nuevasUnidades,
+              paraYoel: nuevoParaYoel,
+              totalCobrado: nuevoTotalCobrado,
+              gananciaVendedora: redondearDinero(nuevoTotalCobrado - nuevoParaYoel)
+            };
+          }
+
+          const nuevasUnidadesTotales = Math.max(0, Number(actual.unidades || 0) - unidades);
+          const nuevoParaYoelTotal = redondearDinero(Math.max(0, Number(actual.paraYoel || 0) - importeYoelRetirado));
+          const nuevoCobradoTotal = redondearDinero(Math.max(0, Number(actual.totalCobrado || 0) - importeCobradoRetirado));
+          const rectificaciones = { ...(actual.rectificaciones || {}) };
+          rectificaciones[correccionRef.key] = {
+            timestamp: Date.now(),
+            productoId: producto,
+            productoNombre: detalleActual.nombre || detalleSeleccionado.nombre || 'Producto',
+            cantidad: unidades,
+            paraYoelRetirado: importeYoelRetirado,
+            totalCobradoRetirado: importeCobradoRetirado,
+            correccionLogId: correccionRef.key,
+            stockDevuelto: unidades,
+            usuario: currentUser?.email || ''
+          };
+
+          return {
+            ...actual,
+            unidades: nuevasUnidadesTotales,
+            paraYoel: nuevoParaYoelTotal,
+            totalCobrado: nuevoCobradoTotal,
+            gananciaVendedora: redondearDinero(nuevoCobradoTotal - nuevoParaYoelTotal),
+            detalleProductos,
+            rectificaciones,
+            rectificadaEn: Date.now(),
+            rectificadaPor: currentUser?.email || ''
+          };
+        });
+
+        if (!resultado.committed) {
+          showToast('Esa venta ya fue rectificada o la liquidación cambió', 'error', 3800);
+          return false;
+        }
+
+        liquidaciones[id] = resultado.snapshot.val() || {};
+        const resultadoStock = await runTransaction(ref(db, `productos/${producto}`), actual => {
+          if (!actual) return;
+          return {
+            ...actual,
+            stock: Number(actual.stock || 0) + unidades,
+            emailAgotadoEnviado: false
+          };
+        });
+        if (!resultadoStock.committed) throw new Error('El producto ya no existe y no se pudo devolver el stock.');
+
+        const productoActualizado = resultadoStock.snapshot.val() || {};
+        productos[producto] = { ...(productos[producto] || {}), ...productoActualizado };
+        await syncProductoPublico(producto, productos[producto]);
+
+        const timestampFinal = new Date(`${fechaPorDefecto}T12:00:00`).getTime();
+        const nombreProducto = detalleSeleccionado.nombre || productos[producto]?.nombre || 'Producto';
+        const imagenProducto = productos[producto]?.imagen || '';
+        const usuario = currentUser?.email || '';
+        const precioYoelLiquidado = unidades ? importeYoelRetirado / unidades : 0;
+        const precioVentaLiquidado = unidades ? importeCobradoRetirado / unidades : 0;
+        const changes = {};
+
+        changes[`logs/${correccionRef.key}`] = {
+          timestamp: timestampFinal,
+          fecha: new Date(timestampFinal).toLocaleString('es-ES'),
+          tipo: 'eliminacion-venta',
+          productoId: producto,
+          productoNombre: nombreProducto,
+          productoImagen: imagenProducto,
+          cantidad: unidades,
+          precioyoel: precioYoelLiquidado,
+          precioLaura: precioVentaLiquidado,
+          totalyoel: importeYoelRetirado,
+          totalLaura: importeCobradoRetirado,
+          usuario,
+          liquidacionId: id,
+          registradaEn: Date.now(),
+          stockDevuelto: unidades,
+          detalles: String(notas || '').trim() || 'Venta retirada de una liquidación cerrada; stock devuelto'
+        };
+        await update(ref(db), changes);
+
+        renderLiquidaciones();
+        programarRender();
+        showToast(`${unidades} venta${unidades === 1 ? '' : 's'} rectificada${unidades === 1 ? '' : 's'}. El stock ha sido devuelto.`, 'success', 4400);
+        return true;
+      } catch (error) {
+        console.error(error);
+        showToast('No se pudo completar la rectificación. Revisa la conexión e inténtalo de nuevo.', 'error', 4400);
+        return false;
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Rectificar venta';
+      }
+    }
+  });
+
+  const productoSelect = document.getElementById('modal-field-producto');
+  const cantidadInput = document.getElementById('modal-field-cantidad');
+  const actualizarProductoModal = () => {
+    const detalle = productosLiquidacion.find(item => item.productoId === productoSelect.value);
+    if (!detalle) return;
+    cantidadInput.max = Number(detalle.unidades || 1);
+    if (Number(cantidadInput.value || 1) > Number(detalle.unidades || 1)) cantidadInput.value = 1;
+  };
+  productoSelect.addEventListener('change', actualizarProductoModal);
 };
 
 window.cerrarLiquidacion = () => {
