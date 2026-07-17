@@ -109,7 +109,7 @@
 
           <div class="expense-form">
             <div class="form-field">
-              <label for="gastoFecha">Fecha *</label>
+              <label for="gastoFecha" id="gastoFechaLabel">Fecha *</label>
               <input id="gastoFecha" type="date">
             </div>
             <div class="form-field">
@@ -150,6 +150,20 @@
             <div class="form-field">
               <label for="gastoNotas">Notas</label>
               <input id="gastoNotas" maxlength="240" placeholder="Opcional">
+            </div>
+            <div class="form-field span-2 recurrence-field">
+              <label class="recurrence-toggle" for="gastoRecurrente">
+                <input id="gastoRecurrente" type="checkbox" onchange="actualizarFormularioRecurrente()">
+                <span><strong>Repetir este gasto cada mes</strong><small>Ideal para Patreon, suscripciones, licencias y otros servicios mensuales.</small></span>
+              </label>
+            </div>
+            <div id="gastoRecurrenteOpciones" class="recurrence-options span-2 hidden">
+              <div class="form-field">
+                <label for="gastoFechaFin">Finaliza el</label>
+                <input id="gastoFechaFin" type="date">
+                <small>Opcional. Déjalo vacío mientras el servicio siga activo.</small>
+              </div>
+              <div class="recurrence-explanation">Se contabilizará automáticamente una cuota al mes, en el mismo día del primer cobro. Nunca se añadirán cuotas futuras antes de que llegue su fecha.</div>
             </div>
           </div>
 

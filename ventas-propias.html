@@ -61,7 +61,14 @@
           </div>
 
           <div class="direct-sale-form">
-            <div class="product-picker span-2">
+            <div class="sale-source-choice span-2">
+              <label class="sale-source-toggle" for="ventaPropiaSinInventario">
+                <input id="ventaPropiaSinInventario" type="checkbox" onchange="actualizarModoVentaPropia()">
+                <span><strong>Producto por encargo o fuera del inventario</strong><small>Registra el ingreso sin crear el producto ni modificar el stock.</small></span>
+              </label>
+            </div>
+            <label id="ventaPropiaNombreLibreField" class="span-2 hidden"><span>Nombre o concepto *</span><input id="ventaPropiaNombreLibre" maxlength="140" placeholder="Ej. Diseño personalizado por encargo"></label>
+            <div id="ventaPropiaInventarioPicker" class="product-picker span-2">
               <input id="ventaPropiaProducto" type="hidden" value="">
               <div class="product-picker-head">
                 <div>
@@ -100,8 +107,8 @@
           <span class="operations-eyebrow">SEPARACIÓN</span>
           <h2>¿Qué modifica?</h2>
           <ul>
-            <li>Descuenta el stock real del producto.</li>
-            <li>Actualiza la disponibilidad del catálogo.</li>
+            <li>Si eliges un producto del inventario, descuenta su stock y actualiza el catálogo.</li>
+            <li>Si marcas que es un encargo, registra el ingreso sin crear ni modificar productos.</li>
             <li>Guarda el ingreso en tu historial privado.</li>
             <li>No cambia el dinero pendiente de liquidar a la vendedora.</li>
           </ul>

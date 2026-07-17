@@ -54,6 +54,22 @@
     return productos[document.getElementById('ventaPropiaProducto').value] || null;
   }
 
+  function ventaFueraInventarioActiva() {
+    return document.getElementById('ventaPropiaSinInventario').checked;
+  }
+
+  window.actualizarModoVentaPropia = function () {
+    const fueraInventario = ventaFueraInventarioActiva();
+    document.getElementById('ventaPropiaInventarioPicker').classList.toggle('hidden', fueraInventario);
+    document.getElementById('ventaPropiaStockInfo').classList.toggle('hidden', fueraInventario);
+    document.getElementById('ventaPropiaNombreLibreField').classList.toggle('hidden', !fueraInventario);
+    const button = document.getElementById('guardarVentaPropiaBtn');
+    button.textContent = fueraInventario ? 'Registrar venta sin modificar stock' : 'Registrar venta y descontar stock';
+    if (fueraInventario) {
+      setTimeout(() => document.getElementById('ventaPropiaNombreLibre').focus(), 0);
+    }
+  };
+
   function importeTotalVentaPropia(sale) {
     return Math.max(0, Number(sale?.totalVentaPropia ?? sale?.totalyoel ?? sale?.totalLaura ?? 0));
   }
@@ -160,6 +176,12 @@
     const name = document.createElement('span');
     name.textContent = sale.productoNombre || 'Producto';
     wrap.append(imageWrap, name);
+    if (sale.ventaSinInventario) {
+      const badge = document.createElement('span');
+      badge.className = 'direct-sale-custom-badge';
+      badge.textContent = 'Fuera de inventario';
+      wrap.appendChild(badge);
+    }
     cell.appendChild(wrap);
     return cell;
   }
@@ -238,14 +260,17 @@
   }
 
   window.registrarVentaPropia = async function () {
+    const fueraInventario = ventaFueraInventarioActiva();
     const productId = document.getElementById('ventaPropiaProducto').value;
     const product = productos[productId];
+    const customName = document.getElementById('ventaPropiaNombreLibre').value.trim();
     const quantity = Number(document.getElementById('ventaPropiaCantidad').value);
     const unitPrice = Number(document.getElementById('ventaPropiaPrecio').value);
     const dateValue = document.getElementById('ventaPropiaFecha').value;
     const paymentMethod = document.getElementById('ventaPropiaMetodo').value;
     const notes = document.getElementById('ventaPropiaNotas').value.trim();
-    if (!product) return toast('Selecciona un producto.', 'error');
+    if (fueraInventario && !customName) return toast('Escribe el nombre o concepto de la venta.', 'error');
+    if (!fueraInventario && !product) return toast('Selecciona un producto.', 'error');
     if (!Number.isInteger(quantity) || quantity <= 0) return toast('La cantidad no es válida.', 'error');
     if (!Number.isFinite(unitPrice) || unitPrice < 0) return toast('El precio no es válido.', 'error');
     if (!dateValue) return toast('Selecciona la fecha de la venta.', 'error');
@@ -254,15 +279,18 @@
     button.disabled = true;
     button.textContent = 'Registrando…';
     try {
-      const result = await runTransaction(ref(db, `productos/${productId}`), current => {
-        if (!current || Number(current.stock || 0) < quantity) return;
-        return { ...current, stock: Number(current.stock || 0) - quantity };
-      });
-      if (!result.committed) throw new Error('No hay stock suficiente para registrar esta venta.');
+      let updatedProduct = null;
+      if (!fueraInventario) {
+        const result = await runTransaction(ref(db, `productos/${productId}`), current => {
+          if (!current || Number(current.stock || 0) < quantity) return;
+          return { ...current, stock: Number(current.stock || 0) - quantity };
+        });
+        if (!result.committed) throw new Error('No hay stock suficiente para registrar esta venta.');
 
-      const updatedProduct = result.snapshot.val() || {};
-      productos[productId] = updatedProduct;
-      await syncPublicStock(productId, updatedProduct.stock);
+        updatedProduct = result.snapshot.val() || {};
+        productos[productId] = updatedProduct;
+        await syncPublicStock(productId, updatedProduct.stock);
+      }
 
       const timestamp = timestampFecha(dateValue);
       const total = quantity * unitPrice;
@@ -270,50 +298,64 @@
         timestamp,
         fecha: new Date(timestamp).toLocaleString('es-ES'),
         tipo: 'venta-propia',
-        productoId: productId,
-        productoNombre: product.nombre || 'Producto',
-        productoImagen: product.imagen || '',
+        productoId: fueraInventario ? '' : productId,
+        productoNombre: fueraInventario ? customName : (product.nombre || 'Producto'),
+        productoImagen: fueraInventario ? '' : (product.imagen || ''),
         cantidad: quantity,
         precioVentaPropia: unitPrice,
         precioyoel: unitPrice,
-        precioBaseProducto: Number(product.yoel || 0),
+        precioBaseProducto: fueraInventario ? 0 : Number(product.yoel || 0),
         totalVentaPropia: total,
         totalyoel: total,
         totalCobrado: total,
         metodoCobro: paymentMethod,
+        ventaSinInventario: fueraInventario,
+        porEncargo: fueraInventario,
+        stockModificado: !fueraInventario,
         usuario: currentUser?.email || '',
-        detalles: notes || `Venta propia · ${metodos[paymentMethod] || paymentMethod}`
+        detalles: notes || `${fueraInventario ? 'Venta propia por encargo fuera de inventario' : 'Venta propia'} · ${metodos[paymentMethod] || paymentMethod}`
       });
 
       document.getElementById('ventaPropiaCantidad').value = 1;
       document.getElementById('ventaPropiaNotas').value = '';
+      document.getElementById('ventaPropiaNombreLibre').value = '';
+      document.getElementById('ventaPropiaSinInventario').checked = false;
+      actualizarModoVentaPropia();
       renderProductos();
       actualizarTotal();
-      toast(`Venta registrada. Stock restante: ${Number(updatedProduct.stock || 0)}.`);
+      toast(fueraInventario
+        ? 'Venta por encargo registrada. El inventario no se ha modificado.'
+        : `Venta registrada. Stock restante: ${Number(updatedProduct.stock || 0)}.`);
     } catch (error) {
       console.error(error);
       toast(error.message || 'No se pudo registrar la venta.', 'error');
     } finally {
       button.disabled = false;
-      button.textContent = 'Registrar venta y descontar stock';
+      actualizarModoVentaPropia();
     }
   };
 
   window.corregirVentaPropia = async function (saleId, button) {
     const sale = ventas.find(item => item.id === saleId);
     if (!sale || sale.anulada) return;
-    if (!confirm(`¿Corregir la venta de ${sale.cantidad} unidad(es) de "${sale.productoNombre}"?\n\nEl stock volverá a sumarse.`)) return;
+    const fueraInventario = sale.ventaSinInventario === true || !sale.productoId;
+    const correctionEffect = fueraInventario
+      ? 'Se anulará el ingreso. El stock no se modificará.'
+      : 'El stock volverá a sumarse.';
+    if (!confirm(`¿Corregir la venta de ${sale.cantidad} unidad(es) de "${sale.productoNombre}"?\n\n${correctionEffect}`)) return;
     sale.anulada = true;
     button.disabled = true;
     try {
-      const result = await runTransaction(ref(db, `productos/${sale.productoId}`), current => {
-        if (!current) return;
-        return { ...current, stock: Number(current.stock || 0) + Number(sale.cantidad || 0), emailAgotadoEnviado: false };
-      });
-      if (!result.committed) throw new Error('El producto ya no existe.');
-      const updatedProduct = result.snapshot.val() || {};
-      productos[sale.productoId] = updatedProduct;
-      await syncPublicStock(sale.productoId, updatedProduct.stock);
+      if (!fueraInventario) {
+        const result = await runTransaction(ref(db, `productos/${sale.productoId}`), current => {
+          if (!current) return;
+          return { ...current, stock: Number(current.stock || 0) + Number(sale.cantidad || 0), emailAgotadoEnviado: false };
+        });
+        if (!result.committed) throw new Error('El producto ya no existe.');
+        const updatedProduct = result.snapshot.val() || {};
+        productos[sale.productoId] = updatedProduct;
+        await syncPublicStock(sale.productoId, updatedProduct.stock);
+      }
 
       const correctionRef = push(logsRef);
       const total = importeTotalVentaPropia(sale);
@@ -335,13 +377,19 @@
         totalVentaPropia: total,
         totalyoel: total,
         totalCobrado: total,
+        ventaSinInventario: fueraInventario,
+        stockModificado: !fueraInventario,
         usuario: currentUser?.email || '',
-        detalles: 'Corrección de venta propia; stock devuelto'
+        detalles: fueraInventario
+          ? 'Corrección de venta propia fuera de inventario; ingreso anulado sin modificar stock'
+          : 'Corrección de venta propia; stock devuelto'
       };
       await update(ref(db), changes);
       renderProductos();
       renderVentas();
-      toast('Venta corregida y stock restaurado.');
+      toast(fueraInventario
+        ? 'Venta corregida. El ingreso se ha anulado sin modificar el stock.'
+        : 'Venta corregida y stock restaurado.');
     } catch (error) {
       sale.anulada = false;
       button.disabled = false;
@@ -384,6 +432,7 @@
   document.getElementById('ventasPropiasDesde').value = `${new Date().getFullYear()}-01-01`;
   document.getElementById('ventasPropiasHasta').value = localYmd();
   actualizarTotal();
+  actualizarModoVentaPropia();
 
   onAuthStateChanged(auth, user => {
     const status = document.getElementById('ventasPropiasStatus');

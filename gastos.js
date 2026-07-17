@@ -108,6 +108,50 @@
       return !!fecha && (!desde || fecha >= desde) && (!hasta || fecha <= hasta);
     }
 
+    function diasEnMes(anio, mesCero) {
+      return new Date(anio, mesCero + 1, 0).getDate();
+    }
+
+    function expandirGasto(id, gasto, desde, hasta) {
+      const base = { id, ...(gasto || {}) };
+      if (gasto?.recurrente !== true) {
+        return dentroPeriodo(String(base.fecha || ''), desde, hasta) ? [base] : [];
+      }
+
+      const inicioTexto = String(gasto.fecha || '');
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(inicioTexto)) return [];
+      const [anioInicio, mesInicio, diaInicio] = inicioTexto.split('-').map(Number);
+      const hoy = localYmd();
+      let limite = hasta && hasta < hoy ? hasta : hoy;
+      const fechaFin = String(gasto.fechaFin || '');
+      if (fechaFin && fechaFin < limite) limite = fechaFin;
+      if (inicioTexto > limite) return [];
+
+      const cuotas = [];
+      let anio = anioInicio;
+      let mesCero = mesInicio - 1;
+      for (let guard = 0; guard < 1200; guard += 1) {
+        const dia = Math.min(diaInicio, diasEnMes(anio, mesCero));
+        const fechaCuota = `${anio}-${String(mesCero + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+        if (fechaCuota > limite) break;
+        if (fechaCuota >= inicioTexto && dentroPeriodo(fechaCuota, desde, hasta)) {
+          cuotas.push({
+            ...base,
+            fecha: fechaCuota,
+            fechaSerie: inicioTexto,
+            esCuotaRecurrente: true,
+            claveCuota: fechaCuota.slice(0, 7)
+          });
+        }
+        mesCero += 1;
+        if (mesCero > 11) {
+          mesCero = 0;
+          anio += 1;
+        }
+      }
+      return cuotas;
+    }
+
     function calcularVentas(desde, hasta) {
       const resultado = { unidades: 0, paraYoel: 0, cobrado: 0 };
 
@@ -132,8 +176,7 @@
       const hasta = document.getElementById('fechaHasta').value;
 
       return Object.entries(gastos || {})
-        .map(([id, gasto]) => ({ id, ...(gasto || {}) }))
-        .filter(gasto => dentroPeriodo(String(gasto.fecha || ''), desde, hasta));
+        .flatMap(([id, gasto]) => expandirGasto(id, gasto, desde, hasta));
     }
 
     function obtenerGastosFiltrados() {
@@ -142,7 +185,7 @@
 
       return obtenerGastosPeriodo()
         .filter(gasto => categoria === 'todos' || gasto.categoria === categoria)
-        .filter(gasto => !texto || `${gasto.concepto || ''} ${gasto.proveedor || ''} ${gasto.notas || ''}`.toLowerCase().includes(texto))
+        .filter(gasto => !texto || `${gasto.concepto || ''} ${gasto.proveedor || ''} ${gasto.notas || ''} ${gasto.recurrente ? 'mensual recurrente suscripcion' : ''}`.toLowerCase().includes(texto))
         .sort((a, b) => String(b.fecha || '').localeCompare(String(a.fecha || '')) || Number(b.creadoEn || 0) - Number(a.creadoEn || 0));
     }
 
@@ -160,7 +203,7 @@
       document.getElementById('kpiIngresosYoel').textContent = euro(ventas.paraYoel);
       document.getElementById('kpiUnidades').textContent = `${ventas.unidades} unidad${ventas.unidades === 1 ? '' : 'es'} vendida${ventas.unidades === 1 ? '' : 's'}`;
       document.getElementById('kpiGastos').textContent = euro(totalGastos);
-      document.getElementById('kpiGastosCount').textContent = `${gastosFiltrados.length} gasto${gastosFiltrados.length === 1 ? '' : 's'} registrado${gastosFiltrados.length === 1 ? '' : 's'}`;
+      document.getElementById('kpiGastosCount').textContent = `${gastosFiltrados.length} cargo${gastosFiltrados.length === 1 ? '' : 's'} contabilizado${gastosFiltrados.length === 1 ? '' : 's'}`;
       document.getElementById('kpiMateriales').textContent = euro(totalMateriales);
       document.getElementById('kpiResultado').textContent = euro(resultado);
       document.getElementById('kpiCobrado').textContent = euro(ventas.cobrado);
@@ -250,15 +293,15 @@
       wrap.classList.remove('hidden');
       tbody.innerHTML = gastosFiltrados.map(gasto => `
         <tr>
-          <td>${escaparHtml(gasto.fecha || '-')}</td>
-          <td><strong>${escaparHtml(gasto.concepto || '')}</strong>${gasto.notas ? `<small>${escaparHtml(gasto.notas)}</small>` : ''}</td>
+          <td>${escaparHtml(gasto.fecha || '-')}${gasto.esCuotaRecurrente ? '<span class="recurrence-pill">Mensual</span>' : ''}</td>
+          <td><strong>${escaparHtml(gasto.concepto || '')}</strong>${gasto.esCuotaRecurrente ? `<small>Serie mensual desde ${escaparHtml(gasto.fechaSerie || gasto.fecha || '')}${gasto.fechaFin ? ` hasta ${escaparHtml(gasto.fechaFin)}` : ''}</small>` : ''}${gasto.notas ? `<small>${escaparHtml(gasto.notas)}</small>` : ''}</td>
           <td><span class="category-pill">${escaparHtml(CATEGORIAS[gasto.categoria] || 'Otros')}</span></td>
           <td>${escaparHtml(gasto.proveedor || '-')}</td>
           <td>${escaparHtml(METODOS[gasto.metodoPago] || '-')}</td>
           <td class="expense-amount">${euro(gasto.importe)}</td>
           <td class="expense-actions">
-            <button class="secondary" onclick="editarGasto('${gasto.id}')">Editar</button>
-            <button class="danger-light" onclick="borrarGasto('${gasto.id}')">Borrar</button>
+            <button class="secondary" onclick="editarGasto('${gasto.id}')">${gasto.esCuotaRecurrente ? 'Editar serie' : 'Editar'}</button>
+            <button class="danger-light" onclick="borrarGasto('${gasto.id}')">${gasto.esCuotaRecurrente ? 'Eliminar serie' : 'Borrar'}</button>
           </td>
         </tr>
       `).join('');
@@ -273,6 +316,12 @@
       renderTabla(gastosFiltradosActuales);
     };
 
+    window.actualizarFormularioRecurrente = () => {
+      const recurrente = document.getElementById('gastoRecurrente').checked;
+      document.getElementById('gastoRecurrenteOpciones').classList.toggle('hidden', !recurrente);
+      document.getElementById('gastoFechaLabel').textContent = recurrente ? 'Fecha del primer cobro *' : 'Fecha *';
+    };
+
     function limpiarFormulario() {
       editId = null;
       document.getElementById('formTitle').textContent = 'Nuevo gasto';
@@ -285,6 +334,9 @@
       document.getElementById('gastoProveedor').value = '';
       document.getElementById('gastoMetodo').value = '';
       document.getElementById('gastoNotas').value = '';
+      document.getElementById('gastoRecurrente').checked = false;
+      document.getElementById('gastoFechaFin').value = '';
+      actualizarFormularioRecurrente();
     }
 
     async function guardarMovimiento(tipo, gastoId, concepto, importe, detalles = '') {
@@ -309,9 +361,14 @@
       const proveedor = document.getElementById('gastoProveedor').value.trim();
       const metodoPago = document.getElementById('gastoMetodo').value;
       const notas = document.getElementById('gastoNotas').value.trim();
+      const recurrente = document.getElementById('gastoRecurrente').checked;
+      const fechaFin = recurrente ? document.getElementById('gastoFechaFin').value : '';
 
       if (!fecha || !concepto || !Number.isFinite(importe) || importe <= 0) {
         return toast('Completa la fecha, el concepto y un importe válido.', 'error');
+      }
+      if (recurrente && fechaFin && fechaFin < fecha) {
+        return toast('La fecha de finalización no puede ser anterior al primer cobro.', 'error');
       }
 
       const btn = document.getElementById('guardarGastoBtn');
@@ -327,6 +384,9 @@
           proveedor,
           metodoPago,
           notas,
+          recurrente,
+          frecuencia: recurrente ? 'mensual' : '',
+          fechaFin,
           actualizadoEn: Date.now(),
           actualizadoPor: currentUser?.email || ''
         };
@@ -334,14 +394,14 @@
         if (editId) {
           const anterior = gastos[editId] || {};
           await update(ref(db, `gastos/${editId}`), data);
-          await guardarMovimiento('gasto-editado', editId, concepto, importe, `Importe anterior: ${euro(anterior.importe)} | Nuevo: ${euro(importe)}`);
+          await guardarMovimiento('gasto-editado', editId, concepto, importe, `Importe anterior: ${euro(anterior.importe)} | Nuevo: ${euro(importe)}${recurrente ? ' | Frecuencia: mensual' : ''}`);
           toast('Gasto actualizado.', 'success');
         } else {
           data.creadoEn = Date.now();
           data.creadoPor = currentUser?.email || '';
           const nuevo = await push(gastosRef, data);
-          await guardarMovimiento('gasto-creado', nuevo.key, concepto, importe, CATEGORIAS[categoria] || categoria);
-          toast('Gasto guardado.', 'success');
+          await guardarMovimiento('gasto-creado', nuevo.key, concepto, importe, `${CATEGORIAS[categoria] || categoria}${recurrente ? ' | Frecuencia: mensual' : ''}`);
+          toast(recurrente ? 'Gasto mensual guardado.' : 'Gasto guardado.', 'success');
         }
 
         limpiarFormulario();
@@ -358,7 +418,7 @@
       const gasto = gastos[id];
       if (!gasto) return;
       editId = id;
-      document.getElementById('formTitle').textContent = 'Editar gasto';
+      document.getElementById('formTitle').textContent = gasto.recurrente ? 'Editar gasto mensual' : 'Editar gasto';
       document.getElementById('guardarGastoBtn').textContent = 'Guardar cambios';
       document.getElementById('cancelEditBtn').classList.remove('hidden');
       document.getElementById('gastoFecha').value = gasto.fecha || localYmd();
@@ -368,6 +428,9 @@
       document.getElementById('gastoProveedor').value = gasto.proveedor || '';
       document.getElementById('gastoMetodo').value = gasto.metodoPago || '';
       document.getElementById('gastoNotas').value = gasto.notas || '';
+      document.getElementById('gastoRecurrente').checked = gasto.recurrente === true;
+      document.getElementById('gastoFechaFin').value = gasto.fechaFin || '';
+      actualizarFormularioRecurrente();
       document.getElementById('nuevoGastoCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
@@ -375,7 +438,10 @@
 
     window.borrarGasto = id => {
       const gasto = gastos[id];
-      if (!gasto || !confirm(`¿Borrar el gasto "${gasto.concepto}" de ${euro(gasto.importe)}?`)) return;
+      const mensaje = gasto?.recurrente
+        ? `¿Eliminar la serie mensual "${gasto.concepto}" de ${euro(gasto.importe)}?\n\nDejarán de contabilizarse todas sus cuotas, incluidas las anteriores.`
+        : `¿Borrar el gasto "${gasto?.concepto || ''}" de ${euro(gasto?.importe)}?`;
+      if (!gasto || !confirm(mensaje)) return;
 
       remove(ref(db, `gastos/${id}`))
         .then(() => guardarMovimiento('gasto-borrado', id, gasto.concepto, gasto.importe, CATEGORIAS[gasto.categoria] || gasto.categoria))
@@ -403,9 +469,10 @@
 
     window.exportarGastosCSV = () => {
       if (!gastosFiltradosActuales.length) return toast('No hay gastos para exportar.', 'error');
-      const filas = [['Fecha', 'Concepto', 'Categoria', 'Proveedor', 'Forma de pago', 'Importe', 'Notas']];
+      const filas = [['Fecha', 'Tipo', 'Concepto', 'Categoria', 'Proveedor', 'Forma de pago', 'Importe', 'Notas']];
       gastosFiltradosActuales.forEach(gasto => filas.push([
         gasto.fecha || '',
+        gasto.esCuotaRecurrente ? 'Mensual' : 'Puntual',
         gasto.concepto || '',
         CATEGORIAS[gasto.categoria] || gasto.categoria || '',
         gasto.proveedor || '',

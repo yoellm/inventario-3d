@@ -834,6 +834,14 @@ tbody tr:hover td,
 .finance-kpi.result.negative { background: var(--md-error-container) !important; }
 .finance-card { margin-bottom: 20px !important; padding: 20px !important; }
 .finance-grid { gap: 20px !important; }
+.finance-page .recurrence-field,
+.finance-page .recurrence-options,
+.finance-page .recurrence-explanation { color: var(--md-text) !important; border-color: var(--md-outline-soft) !important; background: var(--md-surface-2) !important; }
+.finance-page .recurrence-toggle input[type="checkbox"] { width: 20px !important; min-width: 20px !important; height: 20px !important; min-height: 20px !important; padding: 0 !important; }
+.finance-page .recurrence-toggle strong { color: var(--md-text) !important; }
+.finance-page .recurrence-toggle small,
+.finance-page .recurrence-options small { color: var(--md-muted) !important; }
+.finance-page .recurrence-pill { color: var(--md-on-primary-container) !important; background: var(--md-primary-container) !important; }
 .category-row,
 .month-row,
 .category-summary > *,

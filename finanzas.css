@@ -206,6 +206,71 @@
   grid-column:span 2;
 }
 
+.recurrence-field{
+  padding:13px 14px;
+  border:1px solid #dbe4ff;
+  border-radius:12px;
+  background:#f8faff;
+}
+
+.recurrence-toggle{
+  display:flex !important;
+  align-items:flex-start;
+  gap:11px;
+  cursor:pointer;
+}
+
+.recurrence-toggle input[type="checkbox"]{
+  width:20px !important;
+  min-width:20px !important;
+  height:20px !important;
+  min-height:20px !important;
+  margin:2px 0 0 !important;
+  padding:0 !important;
+  accent-color:#2563eb;
+}
+
+.recurrence-toggle span,
+.recurrence-toggle small{
+  display:block;
+}
+
+.recurrence-toggle strong{
+  display:block;
+  color:#101828;
+  font-size:13px;
+}
+
+.recurrence-toggle small,
+.recurrence-options small{
+  margin-top:3px;
+  color:#667085;
+  font-size:11px;
+  font-weight:500;
+  line-height:1.4;
+}
+
+.recurrence-options{
+  display:grid;
+  grid-template-columns:minmax(220px,.7fr) minmax(260px,1.3fr);
+  gap:14px;
+  padding:14px;
+  border:1px solid #dbe4ff;
+  border-radius:12px;
+  background:#f8faff;
+}
+
+.recurrence-explanation{
+  display:flex;
+  align-items:center;
+  padding:12px 14px;
+  border-radius:10px;
+  background:#eef4ff;
+  color:#344054;
+  font-size:12px;
+  line-height:1.45;
+}
+
 .expense-form input,
 .expense-form select,
 .expense-list-tools input,
@@ -336,6 +401,18 @@
   font-weight:800;
 }
 
+.recurrence-pill{
+  display:block;
+  width:max-content;
+  margin-top:5px;
+  padding:4px 7px;
+  border-radius:999px;
+  background:#eef4ff;
+  color:#3538cd;
+  font-size:10px;
+  font-weight:800;
+}
+
 .expense-amount{
   color:#b42318 !important;
   font-size:15px;
@@ -415,6 +492,7 @@
   .finance-kpi.result{grid-column:span 2}
   .expense-form{grid-template-columns:1fr}
   .expense-form .span-2{grid-column:auto}
+  .recurrence-options{grid-template-columns:1fr}
   .finance-card{padding:16px}
   .expense-list-head{align-items:stretch;flex-direction:column}
   .expense-list-tools{align-items:stretch;flex-direction:column;width:100%}
