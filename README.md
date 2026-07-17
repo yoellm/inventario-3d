@@ -7,6 +7,7 @@ Aplicación web para gestionar el stock cedido a la persona que realiza las vent
 1. El administrador crea los productos e indica el stock, el importe para Yoel y el precio final de venta.
    Si un artículo no está fabricado pero puede realizarse bajo pedido, puede marcarlo como **Disponible por encargo**; aparecerá así en el catálogo aunque tenga stock 0.
 2. La vendedora registra ventas o reservas desde el inventario o mediante QR.
+   En su vista del inventario puede comparar **Precio de Yoel** con **Tu precio**. El importe de Yoel es solo de consulta; la vendedora puede modificar su propio precio de venta desde cada producto antes de realizar la operación.
 3. La cabecera muestra las cantidades todavía pendientes: total cobrado, importe para Yoel y ganancia de la vendedora.
 4. Cuando se entrega el dinero, el administrador pulsa **Cerrar liquidación**.
 5. La liquidación queda guardada y únicamente se ponen a cero los contadores de ventas del periodo. El stock, las reservas y el historial se conservan.
@@ -14,6 +15,7 @@ Aplicación web para gestionar el stock cedido a la persona que realiza las vent
 7. Si el administrador vende un artículo por su cuenta, lo registra en **Mis ventas**. Se descuenta el stock y se suma el ingreso a Finanzas, sin modificar la liquidación de la vendedora.
    Si una unidad se registró por error como venta de la vendedora, el botón **Mía** de la columna Vendidos permite traspasarla a **Mis ventas**. El traspaso mantiene el stock, descuenta esa unidad de la liquidación pendiente y conserva ambos movimientos en el historial.
    Si la venta ya estaba incluida en una liquidación cerrada, se usa **Liquidaciones → Rectificar venta**. La liquidación histórica se recalcula y las unidades vuelven al stock. Si realmente era una venta propia, después se registra manualmente en **Mis ventas**, que volverá a descontar esas unidades.
+   Para cierres realizados con la web antigua, que no generaban liquidaciones, la venta se localiza en **Movimientos** después de limpiar el filtro de fechas. El botón **Rectificar** de la propia venta la marca como corregida y devuelve sus unidades al stock.
 
 ## Archivos principales
 

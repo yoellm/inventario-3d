@@ -1276,6 +1276,20 @@ tbody tr:hover td,
   background: var(--md-primary) !important;
 }
 
+#mainApp #tabla .seller-price-edit-btn {
+  width: auto !important;
+  min-width: 54px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding-inline: 10px !important;
+  color: var(--md-primary) !important;
+  border: 1px solid var(--md-outline-soft) !important;
+  border-radius: 999px !important;
+  background: var(--md-surface-1) !important;
+  box-shadow: none !important;
+  font-size: 11px !important;
+}
+
 #mainApp #tabla .prox-group,
 #mainApp #tabla .precio-wrap { flex-wrap: nowrap !important; gap: 4px !important; }
 
@@ -1381,16 +1395,28 @@ tbody tr:hover td,
   html body.solo-user .inventory-card #tabla td:nth-child(1) { grid-column: 1 / -1 !important; order: 1; }
   html body.solo-user .inventory-card #tabla td:nth-child(2) { width: auto !important; min-width: 0 !important; order: 2; }
   html body.solo-user .inventory-card #tabla td:nth-child(4) { order: 3; }
-  html body.solo-user .inventory-card #tabla td:nth-child(7) { order: 4; }
-  html body.solo-user .inventory-card #tabla td:nth-child(8) { order: 5; }
+  html body.solo-user .inventory-card #tabla td:nth-child(6) { order: 4; }
+  html body.solo-user .inventory-card #tabla td:nth-child(7) { order: 5; }
+  html body.solo-user .inventory-card #tabla td:nth-child(8) { order: 6; }
   html body.solo-user .inventory-card #tabla td:nth-child(2)::before { content: "Stock" !important; margin-right: 7px; color: var(--md-muted); font-weight: 400; }
   html body.solo-user .inventory-card #tabla td:nth-child(4)::before { content: "Reservado" !important; margin-right: 7px; color: var(--md-muted); font-weight: 400; }
-  html body.solo-user .inventory-card #tabla td:nth-child(7)::before { content: "Precio" !important; margin-right: 7px; color: var(--md-muted); font-weight: 400; }
+  html body.solo-user .inventory-card #tabla td:nth-child(6)::before { content: "Precio de Yoel" !important; margin-right: 7px; color: var(--md-muted); font-weight: 400; }
+  html body.solo-user .inventory-card #tabla td:nth-child(7)::before { content: "Tu precio" !important; margin-right: 7px; color: var(--md-muted); font-weight: 400; }
   html body.solo-user .inventory-card #tabla td:nth-child(3),
   html body.solo-user .inventory-card #tabla td:nth-child(5),
-  html body.solo-user .inventory-card #tabla td:nth-child(6),
   html body.solo-user .inventory-card #tabla td:nth-child(9),
   html body.solo-user .inventory-card #tabla td:nth-child(10) { display: none !important; }
+  html body.solo-user .inventory-card #tabla td:nth-child(6),
+  html body.solo-user .inventory-card #tabla td:nth-child(7) {
+    min-height: 48px !important;
+    padding: 9px !important;
+    align-items: center !important;
+    border: 1px solid var(--md-outline-soft) !important;
+    border-radius: 9px !important;
+    background: var(--md-surface-2) !important;
+  }
+  html body.solo-user .inventory-card #tabla td:nth-child(6) { font-weight: 600 !important; }
+  html body.solo-user .inventory-card #tabla td:nth-child(7) .precio-wrap { width: 100%; justify-content: space-between; }
   html body.solo-user .inventory-card #tabla td:nth-child(8) { grid-column: 1 / -1 !important; padding-top: 8px !important; }
   html body.solo-user .inventory-card #tabla .operation-actions { width: 100%; grid-template-columns: 44px 1fr 1fr; }
   html body.solo-user .inventory-card #tabla .operation-actions button { min-height: 40px !important; }

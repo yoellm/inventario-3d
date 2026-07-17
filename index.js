@@ -1341,12 +1341,15 @@ window.renderTablaSolo = () => {
   ` : ''}
 </td>
 
-<td>${Number(p.yoel || 0).toFixed(2)}</td>
+<td class="yoel-price-cell"><strong>${Number(p.yoel || 0).toFixed(2)}</strong></td>
 
-<td class="editable laura-negro">
+<td class="editable laura-negro seller-price-cell">
   <div class="precio-wrap">
     <strong>${Number(p.laura || 0).toFixed(2)}</strong>
-    <button class="icon-btn-xs" onclick="modificarPrecioLaura('${id}')" title="Editar precio de venta" aria-label="Editar precio de venta">€</button>
+    ${userRole === 'user'
+      ? `<button class="seller-price-edit-btn" onclick="modificarPrecioLaura('${id}')" title="Modificar tu precio de venta" aria-label="Modificar tu precio de venta">Editar</button>`
+      : `<button class="icon-btn-xs" onclick="modificarPrecioLaura('${id}')" title="Editar precio de venta" aria-label="Editar precio de venta">€</button>`
+    }
   </div>
 </td>
 
@@ -1861,9 +1864,17 @@ function updateUI() {
   const resetBtn = document.getElementById('resetBtn');
   const precioGlobalBtn = document.getElementById('precioGlobalBtn');
   const thAcciones = document.getElementById('thAcciones');
+  const thPrecioYoel = document.getElementById('thPrecioYoel');
+  const thPrecioVenta = document.getElementById('thPrecioVenta');
+  const productoModalYoelLabel = document.getElementById('productoModalYoelLabel');
+  const productoModalLauraLabel = document.getElementById('productoModalLauraLabel');
 
   if (userRole === 'admin') {
     if (thAcciones) thAcciones.style.display = '';
+    if (thPrecioYoel) thPrecioYoel.textContent = 'Para Yoel €';
+    if (thPrecioVenta) thPrecioVenta.textContent = 'Venta €';
+    if (productoModalYoelLabel) productoModalYoelLabel.textContent = 'Para Yoel €';
+    if (productoModalLauraLabel) productoModalLauraLabel.textContent = 'Venta €';
     status.innerHTML = `<strong>Administrador · ${currentUser.email}</strong><span>Inventario, liquidaciones, estadísticas, copias y configuración</span>`;
     status.className = 'admin';
     guardarBtn.disabled = false;
@@ -1873,7 +1884,11 @@ function updateUI() {
     precioGlobalBtn.disabled = false;
   } else {
     if (thAcciones) thAcciones.style.display = 'none';
-    status.innerHTML = `<strong>Ventas · ${currentUser.email}</strong><span>Busca un producto para vender, reservar o consultar el stock</span>`;
+    if (thPrecioYoel) thPrecioYoel.textContent = 'Precio de Yoel €';
+    if (thPrecioVenta) thPrecioVenta.textContent = 'Tu precio €';
+    if (productoModalYoelLabel) productoModalYoelLabel.textContent = 'Precio de Yoel €';
+    if (productoModalLauraLabel) productoModalLauraLabel.textContent = 'Tu precio €';
+    status.innerHTML = `<strong>Ventas · ${currentUser.email}</strong><span>Consulta el precio de Yoel y modifica tu precio antes de vender o reservar</span>`;
     status.className = 'user';
     guardarBtn.disabled = true;
     guardarBtn.className = 'disabled';
@@ -2600,10 +2615,11 @@ window.modificarPrecioLaura = (id) => {
   }
 
   const p = productos[id];
+  const esVendedora = userRole === 'user';
   openModal({
-    title: '💵 Editar precio Laura',
+    title: esVendedora ? 'Editar tu precio de venta' : 'Editar precio de venta',
     fields: [
-      { name: 'precio', label: `Precio de venta para ${p.nombre}`, type: 'number', value: p?.laura || 0, min: 0, step: '0.01' }
+      { name: 'precio', label: `${esVendedora ? 'Tu precio' : 'Precio de venta'} para ${p.nombre}`, type: 'number', value: p?.laura || 0, min: 0, step: '0.01' }
     ],
     onConfirm: async (values) => {
       const precio = Math.max(0, Number(values.precio));
@@ -2612,7 +2628,7 @@ window.modificarPrecioLaura = (id) => {
       productos[id].laura = precio;
       await syncProductoPublico(id, productos[id]);
       await guardarLog('precio-laura', id, productos[id].nombre, precio, currentUser.email);
-      showToast(`✅ Laura: €${precio.toFixed(2)}`, 'success');
+      showToast(`✅ Precio de venta actualizado: €${precio.toFixed(2)}`, 'success');
       refrescarFichaProductoSiAbierta();
       programarRender();
     }
@@ -3128,6 +3144,8 @@ if (userRole === 'admin') {
   editarBtn.classList.remove('hidden');
   borrarBtn.classList.remove('hidden');
   editarLauraBtn.classList.remove('hidden');
+  editarLauraBtn.textContent = '€ Editar precio';
+  editarLauraBtn.title = 'Editar precio de venta';
   ocultarIndexBtn.classList.remove('hidden');
   ocultarIndexBtn.textContent = productoOcultoEnIndex(p) ? '👁️ Index' : '🙈 Index';
   ocultarIndexBtn.title = productoOcultoEnIndex(p) ? 'Mostrar otra vez en index' : 'Ocultar solo del index';
@@ -3135,6 +3153,8 @@ if (userRole === 'admin') {
   editarBtn.classList.add('hidden');
   borrarBtn.classList.add('hidden');
   editarLauraBtn.classList.remove('hidden');
+  editarLauraBtn.textContent = 'Editar tu precio';
+  editarLauraBtn.title = 'Modificar tu precio de venta';
   ocultarIndexBtn.classList.add('hidden');
 } else {
   editarBtn.classList.add('hidden');
@@ -3202,12 +3222,13 @@ window.modificarPrecioLauraDesdeFicha = () => {
   cerrarFichaProducto();
 
   setTimeout(() => {
+    const esVendedora = userRole === 'user';
     openModal({
-      title: '💵 Editar precio Laura',
+      title: esVendedora ? 'Editar tu precio de venta' : 'Editar precio de venta',
       fields: [
         {
           name: 'precio',
-          label: `Precio de venta para ${p.nombre}`,
+          label: `${esVendedora ? 'Tu precio' : 'Precio de venta'} para ${p.nombre}`,
           type: 'number',
           value: p?.laura || 0,
           min: 0,
@@ -3227,7 +3248,7 @@ window.modificarPrecioLauraDesdeFicha = () => {
         document.getElementById('productoModalLaura').textContent = precio.toFixed(2);
         programarRender();
 
-        showToast(`✅ Laura: €${precio.toFixed(2)}`, 'success');
+        showToast(`✅ Precio de venta actualizado: €${precio.toFixed(2)}`, 'success');
       }
     });
   }, 180);

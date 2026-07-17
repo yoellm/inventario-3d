@@ -1,7 +1,7 @@
 (async function () {
     const [firebaseApp, firebaseDatabase, firebaseAuth] = await window.INVENTARIO_BOOT.loadFirebase();
     const { initializeApp } = firebaseApp;
-    const { getDatabase, ref, onValue, remove } = firebaseDatabase;
+    const { getDatabase, ref, get, onValue, remove, push, update } = firebaseDatabase;
     const { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } = firebaseAuth;
     const { firebaseConfig, ADMIN_EMAILS } = window.INVENTARIO_CONFIG;
 
@@ -13,6 +13,7 @@
 
     let todosLogs = [];
     let logsFiltradosActuales = [];
+    let currentUser = null;
     let ordenActual = { campo: 'fecha', dir: 'desc' };
     let quickFilterActual = 'todos';
     const TIPOS_VENTA = new Set(['venta', 'venta-desde-reserva', 'venta-propia', 'eliminacion-venta', 'eliminacion-venta-propia']);
@@ -255,6 +256,56 @@ function tipoClase(tipo){
       return arr;
     }
 
+    function cantidadRectificadaDeVenta(log) {
+      const enlazadas = todosLogs
+        .filter(item => item.tipo === 'eliminacion-venta' && item.ventaOriginalId === log?.key)
+        .reduce((total, item) => total + Number(item.cantidad || 0), 0);
+      return Math.max(Number(log?.cantidadRectificada || 0), enlazadas);
+    }
+
+    function esVentaAntiguaCerrada(log) {
+      if (!['venta', 'venta-desde-reserva'].includes(log?.tipo) || (!log?.productoId && !log?.productoNombre)) return false;
+      const disponibles = Number(log.cantidad || 0) - cantidadRectificadaDeVenta(log);
+      if (log.anulada || disponibles <= 0) return false;
+      return todosLogs.some(item => item.tipo === 'reset-completo' && Number(item.timestamp || 0) > Number(log.timestamp || 0));
+    }
+
+    function normalizarNombreProducto(valor = '') {
+      return String(valor).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    }
+
+    async function resolverProductoActual(log) {
+      if (log?.productoId) {
+        const directo = await get(ref(db, `productos/${log.productoId}`));
+        if (directo.exists()) return { id: log.productoId, producto: directo.val() || {} };
+      }
+
+      const snapshot = await get(ref(db, 'productos'));
+      const productosActuales = Object.entries(snapshot.val() || {});
+      const buscado = normalizarNombreProducto(log?.productoNombre || '');
+      const exactos = productosActuales.filter(([, producto]) => normalizarNombreProducto(producto?.nombre || '') === buscado);
+      if (exactos.length === 1) return { id: exactos[0][0], producto: exactos[0][1] || {} };
+
+      const parecidos = productosActuales.filter(([, producto]) => {
+        const nombre = normalizarNombreProducto(producto?.nombre || '');
+        return buscado && (nombre.includes(buscado) || buscado.includes(nombre));
+      });
+      if (parecidos.length === 1) return { id: parecidos[0][0], producto: parecidos[0][1] || {} };
+
+      throw new Error(`No se encontró el producto actual correspondiente a "${log?.productoNombre || 'esta venta'}".`);
+    }
+
+    function accionesLog(log, productoUrl) {
+      const acciones = [];
+      if (productoUrl) {
+        acciones.push(`<button class="product-link-btn" onclick="verProducto('${productoUrl}')" title="Ver producto">🔍</button>`);
+      }
+      if (esVentaAntiguaCerrada(log)) {
+        acciones.push(`<button class="legacy-sale-correction-btn" onclick="rectificarVentaAntigua('${log.key}')">Rectificar</button>`);
+      }
+      return acciones.length ? `<div class="log-actions">${acciones.join('')}</div>` : '-';
+    }
+
     function renderLogs(logs){
       const tabla = document.getElementById('tablaLogs');
       const count = document.getElementById('logCount');
@@ -272,7 +323,11 @@ function tipoClase(tipo){
         const [claseTipo, claseFila] = tipoClase(log.tipo || '');
         const productoUrl = permiteEnlaceProducto(log) ? `index.html?editId=${encodeURIComponent(log.productoId)}` : '';
         const venta = ventaFirmada(log);
-        const tipoTexto = `${String(log.tipo || '').replace(/-/g,' ').toUpperCase()}${log.anulada ? ' · CORREGIDA' : ''}`;
+        const cantidadRectificada = ['venta', 'venta-desde-reserva'].includes(log.tipo) ? cantidadRectificadaDeVenta(log) : 0;
+        const estadoCorreccion = log.anulada || cantidadRectificada >= Number(log.cantidad || 0)
+          ? ' · CORREGIDA'
+          : cantidadRectificada > 0 ? ' · CORREGIDA PARCIAL' : '';
+        const tipoTexto = `${String(log.tipo || '').replace(/-/g,' ').toUpperCase()}${estadoCorreccion}`;
 
         html += `
           <tr class="${claseFila}">
@@ -286,7 +341,7 @@ function tipoClase(tipo){
             <td class="money-margin">${venta ? euro(venta.margen) : '—'}</td>
             <td>${escaparHtml(log.ip || '—')}</td>
             <td>${escaparHtml(log.dispositivoResumen || '—')}</td>
-            <td>${productoUrl ? `<button class="product-link-btn" onclick="verProducto('${productoUrl}')">🔍</button>` : '-'}</td>
+            <td>${accionesLog(log, productoUrl)}</td>
             <td style="text-align:left;font-size:11px">${escaparHtml(log.detalles || '')}</td>
           </tr>
         `;
@@ -360,9 +415,90 @@ if (['usuario-conectado','consulta-producto','venta','venta-desde-reserva','rese
       document.getElementById('logTipo').value = 'todos';
       quickFilterActual = 'todos';
       ordenActual = { campo: 'fecha', dir: 'desc' };
-      recargarRangoRapido(7);
+      document.getElementById('logFechaDesde').value = '';
+      document.getElementById('logFechaHasta').value = '';
+      aplicarFiltros();
       const btn = document.getElementById('quick-all');
       refrescarQuickButtons(btn);
+    };
+
+    window.rectificarVentaAntigua = async (logId) => {
+      const log = todosLogs.find(item => item.key === logId);
+      if (!log || !esVentaAntiguaCerrada(log)) {
+        return alert('Esta venta ya no se puede rectificar o ya fue corregida.');
+      }
+
+      const disponibles = Number(log.cantidad || 0) - cantidadRectificadaDeVenta(log);
+      let cantidad = 1;
+      if (disponibles > 1) {
+        const respuesta = prompt(`¿Cuántas unidades de "${log.productoNombre}" quieres rectificar?\n\nDisponibles en este movimiento: ${disponibles}`, String(disponibles));
+        if (respuesta === null) return;
+        cantidad = Number(respuesta);
+      }
+      if (!Number.isInteger(cantidad) || cantidad <= 0 || cantidad > disponibles) {
+        return alert(`Introduce una cantidad entre 1 y ${disponibles}.`);
+      }
+      if (!confirm(`¿Rectificar ${cantidad} unidad${cantidad === 1 ? '' : 'es'} de "${log.productoNombre}"?\n\nSe anulará la venta antigua y el stock volverá a sumarse. No se creará una venta propia automáticamente.`)) return;
+
+      try {
+        const productoResuelto = await resolverProductoActual(log);
+        const productoIdActual = productoResuelto.id;
+        const productoActual = productoResuelto.producto || {};
+        const stockActual = Number(productoActual.stock || 0);
+        const cantidadOriginal = Math.max(1, Number(log.cantidad || 0));
+        const factor = cantidad / cantidadOriginal;
+        const redondear = valor => Math.round((Number(valor || 0) + Number.EPSILON) * 100) / 100;
+        const totalYoel = redondear(Number(log.beaCalc || 0) * factor);
+        const totalCobrado = redondear(Number(log.lauraCalc || 0) * factor);
+        const correccionRef = push(logsRef);
+        const timestampHistorico = Number(log.timestamp || Date.now()) + 1;
+        const usuario = currentUser?.email || '';
+        const changes = {};
+
+        changes[`logs/${correccionRef.key}`] = {
+          timestamp: timestampHistorico,
+          fecha: new Date(timestampHistorico).toLocaleString('es-ES'),
+          tipo: 'eliminacion-venta',
+          ventaOriginalId: logId,
+          productoId: productoIdActual,
+          productoIdOriginal: log.productoId || '',
+          productoNombre: log.productoNombre || productoActual.nombre || 'Producto',
+          productoImagen: log.productoImagen || productoActual.imagen || '',
+          cantidad,
+          precioyoel: cantidad ? totalYoel / cantidad : 0,
+          precioLaura: cantidad ? totalCobrado / cantidad : 0,
+          totalyoel: totalYoel,
+          totalLaura: totalCobrado,
+          usuario,
+          registradaEn: Date.now(),
+          stockDevuelto: cantidad,
+          origenVentaAntigua: true,
+          detalles: 'Rectificación de una venta cerrada con la web antigua; stock devuelto'
+        };
+
+        changes[`productos/${productoIdActual}/stock`] = stockActual + cantidad;
+        changes[`productos/${productoIdActual}/emailAgotadoEnviado`] = false;
+        changes[`productos/${productoIdActual}/correccionesVentasAntiguas/${logId}`] = {
+          timestamp: Date.now(),
+          cantidad,
+          correccionLogId: correccionRef.key,
+          usuario
+        };
+        await update(ref(db), changes);
+
+        const stockFinal = stockActual + cantidad;
+        try {
+          await update(ref(db, `productos_publicos/${productoIdActual}`), { stock: stockFinal });
+        } catch (errorPublico) {
+          console.warn('La venta se rectificó, pero no se pudo sincronizar el catálogo público:', errorPublico);
+        }
+
+        alert(`Venta rectificada correctamente. Se han devuelto ${cantidad} unidad${cantidad === 1 ? '' : 'es'} al stock.\n\nSi era una venta tuya, regístrala ahora manualmente en Mis ventas.`);
+      } catch (error) {
+        console.error(error);
+        const codigo = error?.code ? ` [${error.code}]` : '';
+        alert(`No se pudo rectificar la venta${codigo}: ${error.message || 'error desconocido'}`);
+      }
     };
 
     window.verProducto = (url) => {
@@ -477,12 +613,14 @@ if (['usuario-conectado','consulta-producto','venta','venta-desde-reserva','rese
       const status = document.getElementById('status');
 
       if (user && ADMIN_EMAILS.includes(user.email)) {
+        currentUser = user;
         document.body.classList.add('auth-nav-visible');
         loginDiv.classList.add('hidden');
         mainApp.classList.remove('hidden');
         status.className = 'admin';
         status.innerHTML = `<strong>Administrador</strong><span>${user.email} · Movimientos actualizados</span>`;
       } else {
+        currentUser = null;
         document.body.classList.remove('auth-nav-visible');
         mainApp.classList.add('hidden');
         window.INVENTARIO_BOOT.redirectToLogin();
